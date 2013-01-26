@@ -10,17 +10,28 @@ OPTIMIZATION = -O2
 
 
 
-SRC=$(wildcard  *.c) core/stm32fxxx_it.c core/system_stm32f$(STM32F)xx.c 
+SRC=$(wildcard  *.c usb/*.c libs/*.c) core/stm32fxxx_it.c core/system_stm32f$(STM32F)xx.c core/syscalls.c \
+	STM32_USB_Device_Library/Core/src/usbd_core.c \
+	STM32_USB_Device_Library/Core/src/usbd_req.c \
+	STM32_USB_Device_Library/Core/src/usbd_ioreq.c \
+	STM32_USB_Device_Library/Class/cdc/src/usbd_cdc_core.c \
+	STM32_USB_OTG_Driver/src/usb_core.c \
+	STM32_USB_OTG_Driver/src/usb_dcd.c \
+	STM32_USB_OTG_Driver/src/usb_dcd_int.c 
+
 ASRC=core/startup_stm32f$(STM32F)xx.s
 OBJECTS= $(SRC:.c=.o) $(ASRC:.s=.o)
 LSTFILES= $(SRC:.c=.lst)
-HEADERS=$(wildcard core/*.h)
+HEADERS=$(wildcard core/*.h usb/*.h)
 
 #  Compiler Options
-GCFLAGS = -DSTM32F=$(STM32F) -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -I. -Icore -DARM_MATH_CM$(CORTEXM) -DUSE_STDPERIPH_DRIVER 
+GCFLAGS = -DSTM32F=$(STM32F) -DUSE_USB_OTG_FS=1 -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -I. -Icore -Iusb -DARM_MATH_CM$(CORTEXM) -DUSE_STDPERIPH_DRIVER 
 ifeq ($(CORTEXM),4)
 GCFLAGS+= -mfpu=fpv4-sp-d16 -mfloat-abi=hard -falign-functions=16 
 endif
+GCFLAGS+=-ISTM32_USB_Device_Library/Class/cdc/inc
+GCFLAGS+=-ISTM32_USB_OTG_Driver/inc
+GCFLAGS+=-ISTM32_USB_Device_Library/Core/inc
 # Warnings
 GCFLAGS += -Wstrict-prototypes -Wundef -Wall -Wextra -Wunreachable-code  
 # Optimizazions
@@ -28,7 +39,8 @@ GCFLAGS += -fsingle-precision-constant -funsigned-char -funsigned-bitfields -fpa
 # Debug stuff
 GCFLAGS += -Wa,-adhlns=$(<:.c=.lst),-gstabs -g 
 
-GCFLAGS+= -ISTM32F$(STM32F)_drivers/inc
+GCFLAGS+= -ISTM32F$(STM32F)_drivers/inc 
+
 
 
 LDFLAGS = -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -nostartfiles -T$(LSCRIPT) 
@@ -67,6 +79,7 @@ clean:
 	$(REMOVE) $(PROJECT).bin
 	$(REMOVE) $(PROJECT).elf
 	make -C STM32F$(STM32F)_drivers/build clean
+	make -C STM32_DSP_Lib/build clean
 
 #########################################################################
 
