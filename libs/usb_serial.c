@@ -1,6 +1,9 @@
 #include "stdarg.h"
 #include "stdio.h"
 #include "string.h"
+
+#ifdef USE_USB_OTG_FS
+
 #include "usbd_cdc_core.h"
 #include "usbd_usr.h"
 #include "usb_conf.h"
@@ -63,4 +66,4 @@ void write_usb(uint8_t byte)
 			APP_Rx_ptr_in = 0;
 		}  
 }
-
+#endif

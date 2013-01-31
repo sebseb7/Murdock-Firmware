@@ -1,13 +1,17 @@
 #include "main.h"
 
-#include "libs/armmath.h"
+
+//#include "libs/armmath.h"
 #include "libs/usb_serial.h"
 #include "libs/buttons.h"
 #include "libs/leds.h"
 #include "libs/spektrum.h"
+#include "libs/rng.h"
 
 /*
  *	boot loader: http://www.st.com/stonline/stappl/st/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/APPLICATION_NOTE/CD00167594.pdf (page 31)
+ *	datasheet: http://www.st.com/internet/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/DATASHEET/DM00037051.pdf
+ *	user manual: http://www.st.com/internet/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/REFERENCE_MANUAL/DM00031020.pdf
  */
 
 static uint16_t buttonsInitialized = 0;
@@ -66,9 +70,13 @@ int main(void)
 	Spektrum_init();
 
 
-	//usb_serial_init();
-
-
+#ifdef USE_USB_OTG_FS
+	usb_serial_init();
+#endif
+#ifdef USE_USB_OTG_FS
+	RNG_Enable();
+	usbprintf("%u %u %u %u\n",SIGNATURE->UID1,SIGNATURE->UID2,SIGNATURE->UID3,RNG_Get());
+#endif
 
 	while(1)  // Do not exit
 	{

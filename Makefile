@@ -7,31 +7,39 @@ LSCRIPT=core/stm32f$(STM32F)xx_flash.ld
 
 OPTIMIZATION = -O2
 
+WITHUSB=0
 
 
 
-SRC=$(wildcard  *.c usb/*.c libs/*.c) core/stm32fxxx_it.c core/system_stm32f$(STM32F)xx.c core/syscalls.c \
-	STM32_USB_Device_Library/Core/src/usbd_core.c \
+SRC=$(wildcard  *.c libs/*.c) core/stm32fxxx_it.c core/system_stm32f$(STM32F)xx.c core/syscalls.c
+HEADERS=$(wildcard core/*.h)
+
+ifeq ($(WITHUSB),1)
+SRC +=$(wildcard usb/*.c) STM32_USB_Device_Library/Core/src/usbd_core.c \
 	STM32_USB_Device_Library/Core/src/usbd_req.c \
 	STM32_USB_Device_Library/Core/src/usbd_ioreq.c \
 	STM32_USB_Device_Library/Class/cdc/src/usbd_cdc_core.c \
 	STM32_USB_OTG_Driver/src/usb_core.c \
 	STM32_USB_OTG_Driver/src/usb_dcd.c \
 	STM32_USB_OTG_Driver/src/usb_dcd_int.c 
+HEADERS +=$(wildcard usb/*.h)
+endif
 
 ASRC=core/startup_stm32f$(STM32F)xx.s
 OBJECTS= $(SRC:.c=.o) $(ASRC:.s=.o)
 LSTFILES= $(SRC:.c=.lst)
-HEADERS=$(wildcard core/*.h usb/*.h)
 
 #  Compiler Options
-GCFLAGS = -DSTM32F=$(STM32F) -DUSE_USB_OTG_FS=1 -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -I. -Icore -Iusb -DARM_MATH_CM$(CORTEXM) -DUSE_STDPERIPH_DRIVER 
+GCFLAGS = -DSTM32F=$(STM32F)  -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -I. -Icore  -DARM_MATH_CM$(CORTEXM) -DUSE_STDPERIPH_DRIVER 
 ifeq ($(CORTEXM),4)
 GCFLAGS+= -mfpu=fpv4-sp-d16 -mfloat-abi=hard -falign-functions=16 
 endif
+ifeq ($(WITHUSB),1)
+GCFLAGS += -DUSE_USB_OTG_FS=1 -Iusb
 GCFLAGS+=-ISTM32_USB_Device_Library/Class/cdc/inc
 GCFLAGS+=-ISTM32_USB_OTG_Driver/inc
 GCFLAGS+=-ISTM32_USB_Device_Library/Core/inc
+endif
 # Warnings
 GCFLAGS += -Wstrict-prototypes -Wundef -Wall -Wextra -Wunreachable-code  
 # Optimizazions
@@ -67,7 +75,7 @@ STM32F$(STM32F)_drivers/build/libSTM32F$(STM32F)_drivers.a:
 
 $(PROJECT).bin: $(PROJECT).elf Makefile
 	@echo "generating $(PROJECT).bin"
-	@$(OBJCOPY) -R .stack -O binary $(PROJECT).elf $(PROJECT).bin
+	@$(OBJCOPY) --strip-unneeded -S -g -R .stack -O binary $(PROJECT).elf $(PROJECT).bin
 
 $(PROJECT).elf: $(OBJECTS) Makefile $(LSCRIPT)
 	@echo "  LD $(PROJECT).elf"
@@ -79,7 +87,6 @@ clean:
 	$(REMOVE) $(PROJECT).bin
 	$(REMOVE) $(PROJECT).elf
 	make -C STM32F$(STM32F)_drivers/build clean
-	make -C STM32_DSP_Lib/build clean
 
 #########################################################################
 

@@ -1,5 +1,7 @@
 
 #include "spektrum.h"
+#include "uart.h"
+
 /*
  *
  * spektrum 18.4ms after powerup
@@ -22,6 +24,19 @@ static void A1_GPIO(void)
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
+static void A1_UART(void)
+{
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;       
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_UART4);
+}
+
 void Spektrum_init(void)
 {
 	//A0 as output
@@ -38,8 +53,9 @@ void Spektrum_init(void)
 
 	//enable A1 UART RX
 	//dma usart init
-	//TODO
 	
+	A1_UART();
+	UART_Init();
 
 	//powerup
 	GPIOA->ODR           &=       ~(1<<0);
@@ -63,7 +79,7 @@ void Spektrum_bind(void)
 
 
 	GPIOA->ODR           |=       (1<<1);
-	//powerp
+	//powerup
 	GPIOA->ODR           &=       ~(1<<0);
 
 	Delay(19);
