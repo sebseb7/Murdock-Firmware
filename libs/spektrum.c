@@ -9,6 +9,18 @@
  *
  *
  */
+	
+static void A1_GPIO(void)
+{
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;       
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
 
 void Spektrum_init(void)
 {
@@ -18,12 +30,13 @@ void Spektrum_init(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
 	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0;       
 	GPIOA->ODR           |=       (1<<0);
 	GPIO_Init(GPIOA, &GPIO_InitStructure);  
 
 
+	//enable A1 UART RX
 	//dma usart init
 	//TODO
 	
@@ -35,16 +48,18 @@ void Spektrum_init(void)
 
 void Spektrum_bind(void)
 {
+
+	//disable DMA A1
+	//TODO
+	//
+	A1_GPIO();
+	
 	//powerdown
 	GPIOA->ODR           |=       (1<<0);
+	GPIOA->ODR           &=       ~(1<<1);
 
-	Delay(300);
+	Delay(2000);
 
-	//disable DMA A0
-	//TODO
-
-	//enable GPIO A0 out
-	//TODO
 
 
 	GPIOA->ODR           |=       (1<<1);
@@ -61,10 +76,10 @@ void Spektrum_bind(void)
 		Delay100us(1);
 	}
 
-	//disable GPIO A0 -> enable A0 UART RX
+	//disable GPIO A1 -> enable A1 UART RX
 	//TODO
 
-	//reenable DMA
+	//reenable DMA A1
 	//TODO
 }
 

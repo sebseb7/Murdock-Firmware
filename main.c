@@ -4,6 +4,7 @@
 #include "libs/usb_serial.h"
 #include "libs/buttons.h"
 #include "libs/leds.h"
+#include "libs/spektrum.h"
 
 /*
  *	boot loader: http://www.st.com/stonline/stappl/st/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/APPLICATION_NOTE/CD00167594.pdf (page 31)
@@ -44,10 +45,6 @@ void TimingDelay_Decrement(void)
 
 		sample_buttons();
 
-		if(get_key_press( KEY_A ))
-		{
-			LED_toggle(1);
-		}
 	}
 }
 
@@ -66,6 +63,9 @@ int main(void)
 	INIT_Buttons();
 	buttonsInitialized=1;
 
+	Spektrum_init();
+
+
 	//usb_serial_init();
 
 
@@ -74,7 +74,13 @@ int main(void)
 	{
 		LED_toggle(0);
 
-		Delay(1000);
+		Delay(50);
+		
+		if(get_key_press( KEY_A ))
+		{
+			LED_toggle(1);
+			Spektrum_bind();
+		}
 	}
 }
 
