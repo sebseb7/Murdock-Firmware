@@ -5,6 +5,7 @@
 
 void TimingDelay_Decrement(void);
 void Delay(__IO uint32_t nTime);
+void Delay100us(__IO uint32_t nTime);
 
 
 
