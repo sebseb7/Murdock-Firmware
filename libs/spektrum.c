@@ -74,7 +74,7 @@ void Spektrum_bind(void)
 	GPIOA->ODR           |=       (1<<0);
 	GPIOA->ODR           &=       ~(1<<1);
 
-	Delay(2000);
+	Delay(200);
 
 
 
@@ -82,9 +82,9 @@ void Spektrum_bind(void)
 	//powerup
 	GPIOA->ODR           &=       ~(1<<0);
 
-	Delay(19);
+	Delay(90);
 
-	for(int i = 0;i < 5;i++)
+	for(int i = 0;i < 4;i++)
 	{
 		GPIOA->ODR           &=       ~(1<<1);
 		Delay100us(1);
@@ -93,7 +93,7 @@ void Spektrum_bind(void)
 	}
 
 	//disable GPIO A1 -> enable A1 UART RX
-	//TODO
+	A1_UART();
 
 	//reenable DMA A1
 	//TODO
