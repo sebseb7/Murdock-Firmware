@@ -23,43 +23,20 @@ static __IO uint32_t TimingDelay;
 static __IO uint32_t tick;
 static __IO uint32_t count_event = 0;
 
-// systick counters for main loop
-
-
-void Delay100us(__IO uint32_t nTime)
-{
-	TimingDelay = nTime;
-	while(TimingDelay != 0);
-}
 void Delay(__IO uint32_t nTime)
 {
 	TimingDelay = nTime*10;
-
 	while(TimingDelay != 0);
 }
 
 void TimingDelay_Decrement(void)
 {
-	static uint8_t button_sample = 0;
-
 	if (TimingDelay != 0x00)
 	{ 
 		TimingDelay--;
 	}
 	count_event = 1;
 	tick++;
-
-	
-	if(buttonsInitialized)
-	{
-		button_sample++;
-		if(button_sample == 100)
-		{
-			button_sample = 0;
-			sample_buttons();
-		}
-	}
-
 }
 
 
@@ -89,8 +66,9 @@ int main(void)
 	usb_serial_init();
 #endif
 
-	uint16_t led_counter = 0;
+	uint32_t led_counter = 0;
 	uint32_t bind_counter = 4000;
+	uint32_t button_counter = 0;
 
 
 	while(1)  // main loop
@@ -98,14 +76,22 @@ int main(void)
 		if(count_event == 1)
 		{
 			count_event = 0;
-
+	
+			if(buttonsInitialized)
+			{
+				button_counter++;
+				if(button_counter == 30)
+				{
+					button_counter = 0;
+					sample_buttons();
+				}
+			}
 
 			if (bind_counter < 3000)
 			{ 
 				Spektrum_bind(bind_counter);
 				bind_counter++;
 			}
-
 
 			led_counter++;
 			if(led_counter > 3000)
@@ -115,9 +101,6 @@ int main(void)
 			}
 
 		}
-
-
-
 
 		
 		if(get_key_press( KEY_A ))
