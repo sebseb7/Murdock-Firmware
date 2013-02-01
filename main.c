@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "main.h"
 
 
@@ -19,6 +21,11 @@ static uint16_t buttonsInitialized = 0;
 
 static __IO uint32_t TimingDelay;
 static __IO uint32_t tick;
+static __IO uint32_t count_event = 0;
+
+// systick counters for main loop
+
+
 void Delay100us(__IO uint32_t nTime)
 {
 	TimingDelay = nTime;
@@ -39,17 +46,20 @@ void TimingDelay_Decrement(void)
 	{ 
 		TimingDelay--;
 	}
+	count_event = 1;
 	tick++;
+
+	
 	if(buttonsInitialized)
 	{
 		button_sample++;
-		if(button_sample < 100)
-			return;
-		button_sample = 0;
-
-		sample_buttons();
-
+		if(button_sample == 100)
+		{
+			button_sample = 0;
+			sample_buttons();
+		}
 	}
+
 }
 
 
@@ -61,6 +71,11 @@ int main(void)
 	RCC_GetClocksFreq(&RCC_Clocks);
 	/* SysTick end of count event each 0.1ms */
 	SysTick_Config(RCC_Clocks.HCLK_Frequency / 10000);
+	
+	//use hardware RNG to initialize rand()
+	RNG_Enable();
+	srand(RNG_Get());
+	RNG_Disable();
 
 
 	INIT_Leds();
@@ -68,26 +83,47 @@ int main(void)
 	buttonsInitialized=1;
 
 	Spektrum_init();
-
+	
 
 #ifdef USE_USB_OTG_FS
 	usb_serial_init();
 #endif
-#ifdef USE_USB_OTG_FS
-	RNG_Enable();
-	usbprintf("%u %u %u %u\n",SIGNATURE->UID1,SIGNATURE->UID2,SIGNATURE->UID3,RNG_Get());
-#endif
 
-	while(1)  // Do not exit
+	uint16_t led_counter = 0;
+	uint32_t bind_counter = 4000;
+
+
+	while(1)  // main loop
 	{
-		LED_toggle(0);
+		if(count_event == 1)
+		{
+			count_event = 0;
 
-		Delay(50);
+
+			if (bind_counter < 3000)
+			{ 
+				Spektrum_bind(bind_counter);
+				bind_counter++;
+			}
+
+
+			led_counter++;
+			if(led_counter > 3000)
+			{
+				led_counter=0;
+				LED_toggle(0);
+			}
+
+		}
+
+
+
+
 		
 		if(get_key_press( KEY_A ))
 		{
-			LED_toggle(1);
-			Spektrum_bind();
+			LED_on(1);
+			bind_counter=0;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 
 #include "spektrum.h"
 #include "uart.h"
+#include "leds.h"
 
 /*
  *
@@ -62,41 +63,82 @@ void Spektrum_init(void)
 
 }
 
-void Spektrum_bind(void)
+void Spektrum_bind(uint32_t counter)
 {
-
-	//disable DMA A1
-	//TODO
-	//
-	A1_GPIO();
-	
-	//powerdown
-	GPIOA->ODR           |=       (1<<0);
-	GPIOA->ODR           &=       ~(1<<1);
-
-	Delay(200);
-
-
-
-	GPIOA->ODR           |=       (1<<1);
-	//powerup
-	GPIOA->ODR           &=       ~(1<<0);
-
-	Delay(90);
-
-	for(int i = 0;i < 4;i++)
+	if(counter == 0)
 	{
+
+		//disable DMA A1
+		//TODO
+		//
+		A1_GPIO();
+	
+		//powerdown
+		GPIOA->ODR           |=       (1<<0);
 		GPIOA->ODR           &=       ~(1<<1);
-		Delay100us(1);
-		GPIOA->ODR           |=       (1<<1);
-		Delay100us(1);
+		return;
 	}
 
-	//disable GPIO A1 -> enable A1 UART RX
-	A1_UART();
+	if(counter == 2000)
+	{
+		GPIOA->ODR           |=       (1<<1);
+		//powerup
+		GPIOA->ODR           &=       ~(1<<0);
+		return;
+	}
+	
+	if(counter == 2900)
+	{
+		GPIOA->ODR           &=       ~(1<<1);
+		return;
+	}
+	if(counter == 2901)
+	{
+		GPIOA->ODR           |=       (1<<1);
+		return;
+	}
+	if(counter == 2902)
+	{
+		GPIOA->ODR           &=       ~(1<<1);
+		return;
+	}
+	if(counter == 2903)
+	{
+		GPIOA->ODR           |=       (1<<1);
+		return;
+	}
+	if(counter == 2904)
+	{
+		GPIOA->ODR           &=       ~(1<<1);
+		return;
+	}
+	if(counter == 2905)
+	{
+		GPIOA->ODR           |=       (1<<1);
+		return;
+	}
+	if(counter == 2906)
+	{
+		GPIOA->ODR           &=       ~(1<<1);
+		return;
+	}
+	if(counter == 2907)
+	{
+		GPIOA->ODR           |=       (1<<1);
+		return;
+	}
+		
+	if(counter == 2910)
+	{
+		//disable GPIO A1 -> enable A1 UART RX
+		A1_UART();
 
-	//reenable DMA A1
-	//TODO
+		//reenable DMA A1
+		//TODO
+	
+		LED_off(1);
+	}
+
 }
 
 
