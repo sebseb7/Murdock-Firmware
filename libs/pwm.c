@@ -3,7 +3,7 @@
 
 
 //
-// servo output on B6 B7 B8 B9 / B0 B1 A6 (A7)
+// servo output on B6 (B7) B8 B9 / B0 B1 A6 A7
 //
 // update:
 //	TIM4->CCR3 = 3231+((_sinf(i)+1.0f)*1615.5f);
@@ -47,7 +47,7 @@ void set_servo(uint32_t servo,float value)
 			TIM4->CCR1 = value*1615.5f+3231;
 			break;
 		case 8:
-			TIM4->CCR2 = value*1615.5f+3231;
+			//TIM4->CCR2 = value*1615.5f+3231;//RX Port
 			break;
 		default:
 			break;
@@ -169,7 +169,8 @@ static void PWM_Tim4_Init(void)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
+	//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -178,7 +179,7 @@ static void PWM_Tim4_Init(void)
 
 
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource6, GPIO_AF_TIM4);
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource7, GPIO_AF_TIM4);
+	//GPIO_PinAFConfig(GPIOB, GPIO_PinSource7, GPIO_AF_TIM4);
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource8, GPIO_AF_TIM4);
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_TIM4);
 
@@ -209,14 +210,14 @@ static void PWM_Tim4_Init(void)
 
 
 	/* PWM1 Mode configuration: Channel2 */
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 0;
+	//TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	//TIM_OCInitStructure.TIM_Pulse = 0;
 
 
-	TIM_OC2Init(TIM4, &TIM_OCInitStructure);
+	//TIM_OC2Init(TIM4, &TIM_OCInitStructure);
 
 
-	TIM_OC2PreloadConfig(TIM4, TIM_OCPreload_Enable);
+	//TIM_OC2PreloadConfig(TIM4, TIM_OCPreload_Enable);
 
 
 	/* PWM1 Mode configuration: Channel3 */
