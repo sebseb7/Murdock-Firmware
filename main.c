@@ -3,12 +3,13 @@
 #include "main.h"
 
 
-//#include "libs/armmath.h"
+#include "libs/armmath.h"
 #include "libs/usb_serial.h"
 #include "libs/buttons.h"
 #include "libs/leds.h"
 #include "libs/spektrum.h"
 #include "libs/rng.h"
+#include "libs/pwm.h"
 
 /*
  *	boot loader: http://www.st.com/stonline/stappl/st/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/APPLICATION_NOTE/CD00167594.pdf (page 31)
@@ -50,17 +51,18 @@ int main(void)
 	SysTick_Config(RCC_Clocks.HCLK_Frequency / 10000);
 	
 	//use hardware RNG to initialize rand()
-	RNG_Enable();
-	srand(RNG_Get());
-	RNG_Disable();
+//	RNG_Enable();
+//	srand(RNG_Get());
+//	RNG_Disable();
 
 
 	INIT_Leds();
-	INIT_Buttons();
-	buttonsInitialized=1;
+	//INIT_Buttons();
+	//buttonsInitialized=1;
 
-	Spektrum_init();
+	//Spektrum_init();
 	
+	PWM_Init();
 
 #ifdef USE_USB_OTG_FS
 	usb_serial_init();
@@ -69,6 +71,18 @@ int main(void)
 	uint32_t led_counter = 0;
 	uint32_t bind_counter = 4000;
 	uint32_t button_counter = 0;
+
+	int i = 0;
+
+	set_servo(1,-1.0f);//7
+	set_servo(2,-0.75f);//8
+	set_servo(3,-0.5f);//5
+	set_servo(4,-0.25f);//6
+	set_servo(5,0);//4
+	set_servo(6,0.336f);//1
+	set_servo(7,0.666f);//2
+	set_servo(8,1.0f);//3
+
 
 
 	while(1)  // main loop
@@ -83,13 +97,13 @@ int main(void)
 				if(button_counter == 30)
 				{
 					button_counter = 0;
-					sample_buttons();
+	//				sample_buttons();
 				}
 			}
 
 			if (bind_counter < 3000)
 			{ 
-				Spektrum_bind(bind_counter);
+	//			Spektrum_bind(bind_counter);
 				bind_counter++;
 			}
 
