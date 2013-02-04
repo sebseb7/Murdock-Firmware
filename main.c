@@ -60,7 +60,7 @@ int main(void)
 	INIT_Buttons();
 	buttonsInitialized=1;
 
-	//Spektrum_init();
+	Spektrum_init();
 	
 	PWM_Init();
 
@@ -71,9 +71,6 @@ int main(void)
 	uint32_t led_counter = 0;
 	uint32_t bind_counter = 4000;
 	uint32_t button_counter = 0;
-
-	int i = 0;
-
 
 	while(1)  // main loop
 	{
@@ -92,9 +89,9 @@ int main(void)
 				}
 			}
 
-			if (bind_counter < 3000)
+			if (bind_counter < 4000)
 			{ 
-	//			Spektrum_bind(bind_counter);
+				Spektrum_bind(bind_counter);
 				bind_counter++;
 			}
 
@@ -112,7 +109,7 @@ int main(void)
 		{
 			set_servo(1,1.0f);
 //			LED_toggle(0);
-//			bind_counter=0;
+			bind_counter=0;
 		}
 		if(get_key_press( KEY_B ))
 		{

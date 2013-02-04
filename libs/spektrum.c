@@ -13,53 +13,54 @@
  *
  */
 	
-static void A1_GPIO(void)
+static void SP_GPIO(void)
 {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;       
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_7 | GPIO_Pin_11;       
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-static void A1_UART(void)
+static void SP_UART(void)
 {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;       
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource1, GPIO_AF_UART4);
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_7 | GPIO_Pin_11;       
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_USART3);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_USART6);
 }
 
 void Spektrum_init(void)
 {
-	//A0 as output
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	//B120 as output
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0;       
-	GPIOA->ODR           |=       (1<<0);
-	GPIO_Init(GPIOA, &GPIO_InitStructure);  
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_12;
+	GPIOB->ODR           |=       (1<<12);
+	GPIO_Init(GPIOB, &GPIO_InitStructure);  
 
 
-	//enable A1 UART RX
+	//enable C7 C11 UART RX
 	//dma usart init
 	
-	A1_UART();
-	UART_Init();
+//	SP_UART();
+//	UART_Init();
 
 	//powerup
-	GPIOA->ODR           &=       ~(1<<0);
+	GPIOB->ODR           &=       ~(1<<12);
 
 }
 
@@ -68,72 +69,82 @@ void Spektrum_bind(uint32_t counter)
 	if(counter == 0)
 	{
 
-		//disable DMA A1
+		//disable DMA C7 C11
 		//TODO
 		//
-		A1_GPIO();
+		SP_GPIO();
 	
 		//powerdown
-		GPIOA->ODR           |=       (1<<0);
-		GPIOA->ODR           &=       ~(1<<1);
+		GPIOB->ODR           |=       (1<<12);
+		GPIOC->ODR           &=       ~(1<<7);
+		GPIOC->ODR           &=       ~(1<<11);
 		return;
 	}
 
 	if(counter == 2000)
 	{
-		GPIOA->ODR           |=       (1<<1);
+		GPIOC->ODR           |=       (1<<7);
+		GPIOC->ODR           |=       (1<<11);
 		//powerup
-		GPIOA->ODR           &=       ~(1<<0);
+		GPIOB->ODR           &=       ~(1<<12);
 		return;
 	}
 	
 	if(counter == 2900)
 	{
-		GPIOA->ODR           &=       ~(1<<1);
+		GPIOC->ODR           &=       ~(1<<7);
+		GPIOC->ODR           &=       ~(1<<11);
 		return;
 	}
 	if(counter == 2901)
 	{
-		GPIOA->ODR           |=       (1<<1);
+		GPIOC->ODR           |=       (1<<7);
+		GPIOC->ODR           |=       (1<<11);
 		return;
 	}
 	if(counter == 2902)
 	{
-		GPIOA->ODR           &=       ~(1<<1);
+		GPIOC->ODR           &=       ~(1<<7);
+		GPIOC->ODR           &=       ~(1<<11);
 		return;
 	}
 	if(counter == 2903)
 	{
-		GPIOA->ODR           |=       (1<<1);
+		GPIOC->ODR           |=       (1<<7);
+		GPIOC->ODR           |=       (1<<11);
 		return;
 	}
 	if(counter == 2904)
 	{
-		GPIOA->ODR           &=       ~(1<<1);
+		GPIOC->ODR           &=       ~(1<<7);
+		GPIOC->ODR           &=       ~(1<<11);
 		return;
 	}
 	if(counter == 2905)
 	{
-		GPIOA->ODR           |=       (1<<1);
+		GPIOC->ODR           |=       (1<<7);
+		GPIOC->ODR           |=       (1<<11);
 		return;
 	}
 	if(counter == 2906)
 	{
-		GPIOA->ODR           &=       ~(1<<1);
+		GPIOC->ODR           &=       ~(1<<7);
+		GPIOC->ODR           &=       ~(1<<11);
 		return;
 	}
 	if(counter == 2907)
 	{
-		GPIOA->ODR           |=       (1<<1);
+		GPIOC->ODR           |=       (1<<7);
+		GPIOC->ODR           |=       (1<<11);
 		return;
 	}
 		
-	if(counter == 2910)
+	if(counter == 3999)
 	{
-		//disable GPIO A1 -> enable A1 UART RX
-		A1_UART();
+		//disable GPIO C7 C11 -> enable  UART RX
+		SP_UART();
 
-		//reenable DMA A1
+		//reenable DMA C7 C11
 		//TODO
 	
 		LED_off(1);
