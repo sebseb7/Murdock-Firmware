@@ -9,7 +9,10 @@ void sample_buttons(void)
 {
 	static uint16_t ct0, ct1;
 	
-	uint16_t key_curr =	GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_6);
+	uint16_t key_curr =	
+				((GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_14)^1)<<2)|
+				((GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_15)^1)<<1)|
+				(GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_3)^1);
 
 	uint16_t i = key_state ^ ~key_curr;
 	
@@ -23,13 +26,13 @@ void sample_buttons(void)
 //C6 as button input
 void INIT_Buttons(void)
 {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_6;       
-	GPIO_Init(GPIOC, &GPIO_InitStructure);  
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_3 | GPIO_Pin_14 |GPIO_Pin_15;       
+	GPIO_Init(GPIOB, &GPIO_InitStructure);  
 }
 
 

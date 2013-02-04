@@ -57,8 +57,8 @@ int main(void)
 
 
 	INIT_Leds();
-	//INIT_Buttons();
-	//buttonsInitialized=1;
+	INIT_Buttons();
+	buttonsInitialized=1;
 
 	//Spektrum_init();
 	
@@ -74,21 +74,12 @@ int main(void)
 
 	int i = 0;
 
-	set_servo(1,-1.0f);//7
-	set_servo(2,-0.75f);//8
-	set_servo(3,-0.5f);//5
-	set_servo(4,-0.25f);//6
-	set_servo(5,0);//4
-	set_servo(6,0.336f);//1
-	set_servo(7,0.666f);//2
-	set_servo(8,1.0f);//3
-
-
 
 	while(1)  // main loop
 	{
 		if(count_event == 1)
 		{
+			TIM3->CCR3 = 3231u;
 			count_event = 0;
 	
 			if(buttonsInitialized)
@@ -97,7 +88,7 @@ int main(void)
 				if(button_counter == 30)
 				{
 					button_counter = 0;
-	//				sample_buttons();
+					sample_buttons();
 				}
 			}
 
@@ -119,8 +110,17 @@ int main(void)
 		
 		if(get_key_press( KEY_A ))
 		{
-			LED_on(1);
-			bind_counter=0;
+			set_servo(1,1.0f);
+//			LED_toggle(0);
+//			bind_counter=0;
+		}
+		if(get_key_press( KEY_B ))
+		{
+			set_servo(1,0.0f);
+		}
+		if(get_key_press( KEY_C ))
+		{
+			set_servo(1,-1.0f);
 		}
 	}
 }
