@@ -35,50 +35,12 @@ void DMA2_Stream1_IRQHandler(void)
 	}
 
 }
-
-void UART_Init(void)
+	
+void USART_DMA_Init(void)
 {
-	for(int i = 0;i<RXBUFFERSIZE;i++)
-	{
-		Rx1Buffer[i]=10;
-		Rx2Buffer[i]=11;
-	}
-	USART_InitTypeDef USART_InitStructure;
 	DMA_InitTypeDef  DMA_InitStructure;
-
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
-
-
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx;
-	USART_Init(USART3, &USART_InitStructure);
-	USART_Init(USART6, &USART_InitStructure);
-	USART_Cmd(USART3, ENABLE);
-	USART_Cmd(USART6, ENABLE);
-	//USART_OverSampling8Cmd(USARTx, ENABLE); 
-
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	/* Configure the Priority Group to 2 bits */
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-
-	/* Enable the UART3 RX DMA Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream1_IRQn;
-	NVIC_Init(&NVIC_InitStructure);
-
-
 	DMA_DeInit(DMA1_Stream1);
 	DMA_DeInit(DMA2_Stream1);
 
@@ -115,6 +77,50 @@ void UART_Init(void)
 	/* Enable the DMA RX Stream */
 	DMA_Cmd(DMA1_Stream1, ENABLE);
 	DMA_Cmd(DMA2_Stream1, ENABLE);
+}
+
+void UART_Init(void)
+{
+	for(int i = 0;i<RXBUFFERSIZE;i++)
+	{
+		Rx1Buffer[i]=10;
+		Rx2Buffer[i]=11;
+	}
+	USART_InitTypeDef USART_InitStructure;
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
+
+
+	USART_InitStructure.USART_BaudRate = 115200;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx;
+	USART_Init(USART3, &USART_InitStructure);
+	USART_Init(USART6, &USART_InitStructure);
+	USART_Cmd(USART3, ENABLE);
+	USART_Cmd(USART6, ENABLE);
+	//USART_OverSampling8Cmd(USARTx, ENABLE); 
+
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	/* Configure the Priority Group to 2 bits */
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+
+	/* Enable the UART3 RX DMA Interrupt */
+	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream1_IRQn;
+	NVIC_Init(&NVIC_InitStructure);
+
+
+	USART_DMA_Init();
+	
 
 
 }

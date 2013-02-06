@@ -102,41 +102,85 @@ int main(void)
 		{
 			rx1_event = 0;
 			uint8_t * rx = getRx1Buffer();
-			ch2 = ((((rx[2]&3)<<8)+rx[3]) / 512.0f)-1;
-			ch6 = ((((rx[4]&3)<<8)+rx[5]) / 512.0f)-1;
-			ch3 = ((((rx[6]&3)<<8)+rx[7]) / 512.0f)-1;
-			ch4 = ((((rx[8]&3)<<8)+rx[9]) / 512.0f)-1;
-			ch1 = ((((rx[10]&3)<<8)+rx[11]) / 512.0f)-1;
-			ch5 = ((((rx[12]&3)<<8)+rx[13]) / 512.0f)-1;
-			ch7 = ((((rx[14]&3)<<8)+rx[15]) / 512.0f)-1;
-			set_servo(3,ch1);
-			set_servo(1,ch2);
-			set_servo(2,ch3);
-			set_servo(4,ch4);
-			set_servo(6,ch5);
-			set_servo(5,ch6);
-			set_servo(7,ch7);
-			receiver_ok=0;
+
+
+			if( 
+				(rx[1] != 0x01)||
+				((rx[2]&0xFC) != 0x04)||
+				((rx[4]&0xFC) != 0x14)||
+				((rx[6]&0xFC) != 0x08)||
+				((rx[8]&0xFC) != 0x0C)||
+				((rx[10]&0xFC) != 0x00)||
+				((rx[12]&0xFC) != 0x10)||
+				((rx[14]&0xFC) != 0x18)
+			)
+			{
+#ifdef USE_USB_OTG_FS
+				usbprintf("sp1 out of sync\n");
+#endif
+				Delay(5);
+				USART_DMA_Init();
+			}
+			else
+			{
+				ch2 = ((((rx[2]&3)<<8)+rx[3]) / 512.0f)-1;
+				ch6 = ((((rx[4]&3)<<8)+rx[5]) / 512.0f)-1;
+				ch3 = ((((rx[6]&3)<<8)+rx[7]) / 512.0f)-1;
+				ch4 = ((((rx[8]&3)<<8)+rx[9]) / 512.0f)-1;
+				ch1 = ((((rx[10]&3)<<8)+rx[11]) / 512.0f)-1;
+				ch5 = ((((rx[12]&3)<<8)+rx[13]) / 512.0f)-1;
+				ch7 = ((((rx[14]&3)<<8)+rx[15]) / 512.0f)-1;
+				set_servo(3,ch1);
+				set_servo(1,ch2);
+				set_servo(2,ch3);
+				set_servo(4,ch4);
+				set_servo(6,ch5);
+				set_servo(5,ch6);
+				set_servo(7,ch7);
+				receiver_ok=0;
+			}
 		}
 		if(rx2_event == 1)
 		{
 			rx2_event = 0;
 			uint8_t * rx = getRx2Buffer();
-			ch2 = ((((rx[2]&3)<<8)+rx[3]) / 512.0f)-1;
-			ch6 = ((((rx[4]&3)<<8)+rx[5]) / 512.0f)-1;
-			ch3 = ((((rx[6]&3)<<8)+rx[7]) / 512.0f)-1;
-			ch4 = ((((rx[8]&3)<<8)+rx[9]) / 512.0f)-1;
-			ch1 = ((((rx[10]&3)<<8)+rx[11]) / 512.0f)-1;
-			ch5 = ((((rx[12]&3)<<8)+rx[13]) / 512.0f)-1;
-			ch7 = ((((rx[14]&3)<<8)+rx[15]) / 512.0f)-1;
-			set_servo(3,ch1);
-			set_servo(1,ch2);
-			set_servo(2,ch3);
-			set_servo(4,ch4);
-			set_servo(6,ch5);
-			set_servo(5,ch6);
-			set_servo(7,ch7);
-			receiver_ok=0;
+
+
+			if( 
+				(rx[1] != 0x01)||
+				((rx[2]&0xFC) != 0x04)||
+				((rx[4]&0xFC) != 0x14)||
+				((rx[6]&0xFC) != 0x08)||
+				((rx[8]&0xFC) != 0x0C)||
+				((rx[10]&0xFC) != 0x00)||
+				((rx[12]&0xFC) != 0x10)||
+				((rx[14]&0xFC) != 0x18)
+			)
+			{
+#ifdef USE_USB_OTG_FS
+				usbprintf("sp2 out of sync\n");
+#endif
+				Delay(5);
+				USART_DMA_Init();
+			}
+			else
+			{
+				ch2 = ((((rx[2]&3)<<8)+rx[3]) / 512.0f)-1;
+				ch6 = ((((rx[4]&3)<<8)+rx[5]) / 512.0f)-1;
+				ch3 = ((((rx[6]&3)<<8)+rx[7]) / 512.0f)-1;
+				ch4 = ((((rx[8]&3)<<8)+rx[9]) / 512.0f)-1;
+				ch1 = ((((rx[10]&3)<<8)+rx[11]) / 512.0f)-1;
+				ch5 = ((((rx[12]&3)<<8)+rx[13]) / 512.0f)-1;
+				ch7 = ((((rx[14]&3)<<8)+rx[15]) / 512.0f)-1;
+				set_servo(3,ch1);
+				set_servo(1,ch2);
+				set_servo(2,ch3);
+				set_servo(4,ch4);
+				set_servo(6,ch5);
+				set_servo(5,ch6);
+				set_servo(7,ch7);
+				receiver_ok=0;
+			}
 		}
 		if(count_event == 1)
 		{
