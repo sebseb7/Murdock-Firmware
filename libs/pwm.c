@@ -103,7 +103,6 @@ static void PWM_Tim3_Init(void)
 	TIM_ARRPreloadConfig(TIM3, ENABLE);
 
 
-	TIM_Cmd(TIM3, ENABLE);
 }
 
 static void PWM_Tim4_Init(void)
@@ -156,7 +155,6 @@ static void PWM_Tim4_Init(void)
 	TIM_ARRPreloadConfig(TIM4, ENABLE);
 
 
-	TIM_Cmd(TIM4, ENABLE);
 }
 
 void PWM_Init(void)
