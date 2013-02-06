@@ -31,12 +31,12 @@ static void SP_UART(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
 	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_7 | GPIO_Pin_11;       
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_USART3);
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_USART6);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_USART6);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_USART3);
 }
 
 void Spektrum_init(void)
@@ -56,8 +56,8 @@ void Spektrum_init(void)
 	//enable C7 C11 UART RX
 	//dma usart init
 	
-//	SP_UART();
-//	UART_Init();
+	SP_UART();
+	UART_Init();
 
 	//powerup
 	GPIOB->ODR           &=       ~(1<<12);
