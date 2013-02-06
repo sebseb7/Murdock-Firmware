@@ -95,6 +95,7 @@ int main(void)
 	uint32_t button_counter = 0;
 	uint32_t receiver_ok = 0;
 	uint32_t receiver_off = 1;
+	
 	while(1)  // main loop
 	{
 		if(rx1_event == 1)
@@ -178,34 +179,21 @@ int main(void)
 			{
 				led_counter=0;
 				LED_toggle(0);
+#ifdef USE_USB_OTG_FS
 				uint8_t * rx1 = getRx1Buffer();
 				uint8_t * rx2 = getRx2Buffer();
 				usbprintf("1: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx1[0],rx1[1],rx1[2],rx1[3],rx1[4],rx1[5],rx1[6],rx1[7],rx1[8],rx1[9],rx1[10],rx1[11],rx1[12],rx1[13],rx1[14],rx1[15]);
 				usbprintf("2: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx2[0],rx2[1],rx2[2],rx2[3],rx2[4],rx2[5],rx2[6],rx2[7],rx2[8],rx2[9],rx2[10],rx2[11],rx2[12],rx2[13],rx2[14],rx2[15]);
-
-
+#endif
 			}
 
 		}
-
-
-
-		if(get_key_press( KEY_A ))
-		{
-			//if( get_key_state(KEY_A | KEY_C) == ((KEY_A|KEY_C)) )
-			//{
-			bind_counter=0;
-			//}
-			set_servo(1,1.0f);
-		}
-
 		if(get_key_press( KEY_B ))
 		{
-			set_servo(1,0.0f);
-		}
-		if(get_key_press( KEY_C ))
-		{
-			set_servo(1,-1.0f);
+			if( get_key_state(KEY_A | KEY_C) == ((KEY_A|KEY_C)) )
+			{
+				bind_counter=0;
+			}
 		}
 	}
 }
