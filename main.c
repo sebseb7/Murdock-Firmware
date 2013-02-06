@@ -108,12 +108,12 @@ int main(void)
 			ch1 = ((((rx[10]&3)<<8)+rx[11]) / 512.0f)-1;
 			ch5 = ((((rx[12]&3)<<8)+rx[13]) / 512.0f)-1;
 			ch7 = ((((rx[14]&3)<<8)+rx[15]) / 512.0f)-1;
-			set_servo(1,ch1);
-			set_servo(2,ch2);
-			set_servo(3,ch3);
+			set_servo(3,ch1);
+			set_servo(1,ch2);
+			set_servo(2,ch3);
 			set_servo(4,ch4);
-			set_servo(5,ch5);
-			set_servo(6,ch6);
+			set_servo(6,ch5);
+			set_servo(5,ch6);
 			set_servo(7,ch7);
 			receiver_ok=0;
 		}
@@ -128,12 +128,12 @@ int main(void)
 			ch1 = ((((rx[10]&3)<<8)+rx[11]) / 512.0f)-1;
 			ch5 = ((((rx[12]&3)<<8)+rx[13]) / 512.0f)-1;
 			ch7 = ((((rx[14]&3)<<8)+rx[15]) / 512.0f)-1;
-			set_servo(1,ch1);
-			set_servo(2,ch2);
-			set_servo(3,ch3);
+			set_servo(3,ch1);
+			set_servo(1,ch2);
+			set_servo(2,ch3);
 			set_servo(4,ch4);
-			set_servo(5,ch5);
-			set_servo(6,ch6);
+			set_servo(6,ch5);
+			set_servo(5,ch6);
 			set_servo(7,ch7);
 			receiver_ok=0;
 		}
