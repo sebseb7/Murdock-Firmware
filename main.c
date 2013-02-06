@@ -8,6 +8,7 @@
 #include "libs/buttons.h"
 #include "libs/leds.h"
 #include "libs/spektrum.h"
+#include "libs/uart.h"
 #include "libs/rng.h"
 #include "libs/pwm.h"
 
@@ -23,6 +24,26 @@ static uint16_t buttonsInitialized = 0;
 static __IO uint32_t TimingDelay;
 static __IO uint32_t tick;
 static __IO uint32_t count_event = 0;
+static __IO uint32_t rx1_event = 0;
+static __IO uint32_t rx2_event = 0;
+
+void Ch1_rx_complete(void)
+{
+	rx1_event = 1;
+}
+void Ch2_rx_complete(void)
+{
+	rx2_event = 1;
+}
+
+float ch1=0.0f;
+float ch2=0.0f;
+float ch3=0.0f;
+float ch4=0.0f;
+float ch5=0.0f;
+float ch6=0.0f;
+float ch7=0.0f;
+
 
 void Delay(__IO uint32_t nTime)
 {
@@ -63,17 +84,31 @@ int main(void)
 	Spektrum_init();
 	
 	PWM_Init();
+	
 
 #ifdef USE_USB_OTG_FS
 	usb_serial_init();
 #endif
 
 	uint32_t led_counter = 0;
+	uint32_t pwm_counter = 0;
 	uint32_t bind_counter = 4000;
 	uint32_t button_counter = 0;
 
 	while(1)  // main loop
 	{
+		if(rx1_event == 1)
+		{
+			rx1_event = 0;
+			uint8_t * rx1 = getRx1Buffer();
+			ch1 = ((((rx1[2]&3)<<8)+rx1[3]) / 512.0f)-1;
+		}
+		if(rx2_event == 1)
+		{
+			rx2_event = 0;
+			uint8_t * rx2 = getRx2Buffer();
+			ch1 = ((((rx2[2]&3)<<8)+rx2[3]) / 512.0f)-1;
+		}
 		if(count_event == 1)
 		{
 			TIM3->CCR3 = 3231u;
@@ -100,17 +135,34 @@ int main(void)
 			{
 				led_counter=0;
 				LED_toggle(0);
+				uint8_t * rx1 = getRx1Buffer();
+				uint8_t * rx2 = getRx2Buffer();
+				usbprintf("1: %u %u %u %u\n", rx1[0],rx1[1],rx1[2],rx1[3],rx1[4],rx1[5],rx1[6],rx1[7],rx1[8],rx1[9],rx1[10],rx1[11],rx1[12],rx1[13],rx1[14],rx1[15]);
+				usbprintf("2: %u %u %u %u\n", rx2[0],rx2[1],rx2[2],rx2[3],rx2[4],rx2[5],rx2[6],rx2[7],rx2[8],rx2[9],rx2[10],rx2[11],rx2[12],rx2[13],rx2[14],rx2[15]);
+				
+
+			}
+			pwm_counter++;
+			if(pwm_counter > 220)
+			{
+				pwm_counter=0;
+				set_servo(1,ch1);
+
 			}
 
 		}
 
+
 		
 		if(get_key_press( KEY_A ))
 		{
+			//if( get_key_state(KEY_A | KEY_C) == ((KEY_A|KEY_C)) )
+			//{
+				bind_counter=0;
+			//}
 			set_servo(1,1.0f);
-//			LED_toggle(0);
-			bind_counter=0;
 		}
+
 		if(get_key_press( KEY_B ))
 		{
 			set_servo(1,0.0f);
