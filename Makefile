@@ -35,7 +35,7 @@ ifeq ($(CORTEXM),4)
 GCFLAGS+= -mfpu=fpv4-sp-d16 -mfloat-abi=hard -falign-functions=16 
 endif
 ifeq ($(WITHUSB),1)
-GCFLAGS += -DUSE_USB_OTG_FS=1 -Iusb
+GCFLAGS+=-DUSE_USB_OTG_FS=1 -Iusb
 GCFLAGS+=-ISTM32_USB_Device_Library/Class/cdc/inc
 GCFLAGS+=-ISTM32_USB_OTG_Driver/inc
 GCFLAGS+=-ISTM32_USB_Device_Library/Core/inc
