@@ -28,7 +28,7 @@ void led_event(void)
 
 	int update  = 0;
 
-	for(int i = 0;i < 16;i++)
+	for(unsigned int i = 0;i < 16;i++)
 	{
 		if( (led_on & (1<<i) )&&(~(led_current_state & (1<<i)) ) )
 		{
@@ -65,22 +65,28 @@ void led_event(void)
 	}
 	if(update == 1)
 	{
-		for(int i = 0 ; i < 16;i++)
+		for(unsigned int i = 0 ; i < 16;i++)
 		{
 			if(led_current_state & (1<<i))
 			{
-				GPIOA->ODR           |=       (1<<2);
+				GPIOA->ODR           &=       ~(1<<2);
 			}
 			else
 			{
-				GPIOA->ODR           &=       ~(1<<2);
+				GPIOA->ODR           |=       (1<<2);
 			}
 			__NOP();
 			__NOP();
 			__NOP();
-		
-		
+			__NOP();
+			__NOP();
+			__NOP();
+			__NOP();
 			GPIOC->ODR           |=       (1<<5);
+			__NOP();
+			__NOP();
+			__NOP();
+			__NOP();
 			__NOP();
 			__NOP();
 			__NOP();
@@ -88,15 +94,27 @@ void led_event(void)
 			__NOP();
 			__NOP();
 			__NOP();
+			__NOP();
+			__NOP();
+			__NOP();
+			__NOP();
 			
 		}
 		GPIOA->ODR           |=       (1<<3);
-			__NOP();
-			__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
 		__NOP();
 		GPIOA->ODR           &=       ~(1<<3);
-			__NOP();
-			__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
+		__NOP();
 		__NOP();
 	
 	}
@@ -106,7 +124,7 @@ void led_event(void)
 
 void LED_on(uint16_t led)
 {
-	led_on |= 1<<led;
+	led_on |= (1<<led);
 	led_fastBlink &= ~(1<<led);
 	led_slowBlink &= ~(1<<led);
 }
@@ -140,12 +158,12 @@ void INIT_Leds(void)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 
-	GPIOA->ODR           &=       ~(1<<2);
+	GPIOA->ODR           |=       (1<<2);
 	GPIOA->ODR           &=       ~(1<<3);
 	GPIOC->ODR           &=       ~(1<<5);
 

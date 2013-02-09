@@ -12,7 +12,7 @@ WITHUSB=0
 
 
 SRC=$(wildcard  *.c libs/*.c) core/stm32fxxx_it.c core/system_stm32f$(STM32F)xx.c core/syscalls.c
-HEADERS=$(wildcard core/*.h)
+HEADERS=$(wildcard core/*.h libs/*.h)
 
 ifeq ($(WITHUSB),1)
 SRC +=$(wildcard usb/*.c) STM32_USB_Device_Library/Core/src/usbd_core.c \

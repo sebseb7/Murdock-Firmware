@@ -95,7 +95,10 @@ int main(void)
 	uint32_t button_counter = 0;
 	uint32_t receiver_ok = 0;
 	uint32_t receiver_off = 1;
-	
+
+	uint8_t xx = 0;
+
+
 	while(1)  // main loop
 	{
 		if(rx1_event == 1)
@@ -219,11 +222,15 @@ int main(void)
 			}
 
 			led_counter++;
+			if(led_counter & 8)
+			{	
+				led_event();
+			}
+
 			if(led_counter > 600)
-			{
+			{	
+				led_event();
 				led_counter=0;
-	//			led_counter=0;
-				LED_toggle(LED_SETUP);
 	
 #ifdef USE_USB_OTG_FS
 				uint8_t * rx1 = getRx1Buffer();
@@ -236,6 +243,12 @@ int main(void)
 		}
 		if(get_key_press( KEY_B ))
 		{
+			LED_toggle(1<<xx);
+			xx++;
+			if(xx == 16)
+			{
+				xx=0;
+			}
 			if( get_key_state(KEY_A | KEY_C) == ((KEY_A|KEY_C)) )
 			{
 				bind_counter=0;
