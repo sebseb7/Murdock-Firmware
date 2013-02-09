@@ -219,10 +219,12 @@ int main(void)
 			}
 
 			led_counter++;
-			if(led_counter > 3000)
+			if(led_counter > 600)
 			{
 				led_counter=0;
-				LED_toggle(0);
+	//			led_counter=0;
+				LED_toggle(LED_SETUP);
+	
 #ifdef USE_USB_OTG_FS
 				uint8_t * rx1 = getRx1Buffer();
 				uint8_t * rx2 = getRx2Buffer();
