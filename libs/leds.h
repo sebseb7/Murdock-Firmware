@@ -8,5 +8,7 @@ void INIT_Leds(void);
 void LED_on(uint8_t led);
 void LED_off(uint8_t led);
 void LED_toggle(uint8_t led);
+void LED_slowBlink(uint8_t led);
+void LED_fastBlink(uint8_t led);
 
 #endif

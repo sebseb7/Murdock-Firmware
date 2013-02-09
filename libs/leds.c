@@ -78,8 +78,6 @@ void led_event(void)
 			update = 1;
 			led_current_state &= ~(1<<i);
 		}
-
-
 	}
 	if(update == 1)
 	{
@@ -91,36 +89,33 @@ void led_event(void)
 
 void LED_on(uint8_t led)
 {
-	if(led == 0)
-	{
-		GPIOA->ODR           &=       ~(1<<2);
-	}
-	if(led == 1)
-	{
-		GPIOA->ODR           &=       ~(1<<2);
-	}
+	led_on |= 1<<led;
+	led_fastBlink &= ~(1<<led);
+	led_slowBlink &= ~(1<<led);
 }
 void LED_off(uint8_t led)
 {
-	if(led == 0)
-	{
-		GPIOA->ODR           |=       1<<2;
-	}
-	if(led == 1)
-	{
-		GPIOA->ODR           |=       1<<2;
-	}
+	led_on &= ~(1<<led);
+	led_fastBlink &= ~(1<<led);
+	led_slowBlink &= ~(1<<led);
 }
 void LED_toggle(uint8_t led)
 {
-	if(led == 0)
-	{
-		GPIOA->ODR           ^=       1<<2;
-	}
-	if(led == 1)
-	{
-		GPIOA->ODR           ^=       1<<2;
-	}
+	led_on ^= (1<<led);
+	led_fastBlink &= ~(1<<led);
+	led_slowBlink &= ~(1<<led);
+}
+void LED_slowBlink(uint8_t led)
+{
+	led_slowBlink |= (1<<led);
+	led_fastBlink &= ~(1<<led);
+	led_on &= ~(1<<led);
+}
+void LED_fastBlink(uint8_t led)
+{
+	led_fastBlink |= (1<<led);
+	led_slowBlink &= ~(1<<led);
+	led_on &= ~(1<<led);
 }
 
 void INIT_Leds(void)
