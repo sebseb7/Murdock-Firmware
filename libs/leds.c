@@ -21,7 +21,7 @@ void led_event(void)
 
 	blink_counter++;
 
-	if(blink_counter>8)
+	if(blink_counter>7)
 	{
 		blink_counter=0;
 	}
@@ -75,82 +75,75 @@ void led_event(void)
 			{
 				GPIOA->ODR           |=       (1<<2);
 			}
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
 			GPIOC->ODR           |=       (1<<5);
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
 			GPIOC->ODR           &=       ~(1<<5);
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
-			__NOP();
 			
 		}
 		GPIOA->ODR           |=       (1<<3);
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
 		GPIOA->ODR           &=       ~(1<<3);
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
-	
 	}
-
 }
 
 
 void LED_on(uint16_t led)
 {
-	led_on |= (1<<led);
-	led_fastBlink &= ~(1<<led);
-	led_slowBlink &= ~(1<<led);
+	for(uint16_t i = 0;i<16;i++)
+	{
+		if(led & (1<<i))
+		{
+			led_on |= (1<<i);
+			led_fastBlink &= ~(1<<i);
+			led_slowBlink &= ~(1<<i);
+		}
+	}
 }
 void LED_off(uint16_t led)
 {
-	led_on &= ~(1<<led);
-	led_fastBlink &= ~(1<<led);
-	led_slowBlink &= ~(1<<led);
+	for(uint16_t i = 0;i<16;i++)
+	{
+		if(led & (1<<i))
+		{
+			led_on &= ~(1<<i);
+			led_fastBlink &= ~(1<<i);
+			led_slowBlink &= ~(1<<i);
+		}
+	}
 }
 void LED_toggle(uint16_t led)
 {
-	led_on ^= (1<<led);
-	led_fastBlink &= ~(1<<led);
-	led_slowBlink &= ~(1<<led);
+	for(uint16_t i = 0;i<16;i++)
+	{
+		if(led & (1<<i))
+		{
+			led_on ^= (1<<i);
+			led_fastBlink &= ~(1<<i);
+			led_slowBlink &= ~(1<<i);
+		}
+	}
 }
 void LED_slowBlink(uint16_t led)
 {
-	led_slowBlink |= (1<<led);
-	led_fastBlink &= ~(1<<led);
-	led_on &= ~(1<<led);
+	for(uint16_t i = 0;i<16;i++)
+	{
+		if(led & (1<<i))
+		{
+			led_slowBlink |= (1<<i);
+			led_fastBlink &= ~(1<<i);
+			led_on &= ~(1<<i);
+		}
+	}
 }
 void LED_fastBlink(uint16_t led)
 {
-	led_fastBlink |= (1<<led);
-	led_slowBlink &= ~(1<<led);
-	led_on &= ~(1<<led);
+	for(uint16_t i = 0;i<16;i++)
+	{
+		if(led & (1<<i))
+		{
+			led_fastBlink |= (1<<i);
+			led_slowBlink &= ~(1<<i);
+			led_on &= ~(1<<i);
+		}
+	}
 }
 
 void INIT_Leds(void)

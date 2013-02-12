@@ -147,7 +147,7 @@ void Spektrum_bind(uint32_t counter)
 		//reenable DMA C7 C11
 		//TODO
 	
-		LED_off(1);
+		LED_off(LED_SP1|LED_SP2|LED_BIND);
 	}
 
 }

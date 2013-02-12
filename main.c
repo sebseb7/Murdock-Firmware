@@ -96,8 +96,6 @@ int main(void)
 	uint32_t receiver_ok = 0;
 	uint32_t receiver_off = 1;
 
-	uint8_t xx = 0;
-
 
 	while(1)  // main loop
 	{
@@ -141,6 +139,7 @@ int main(void)
 				set_servo(5,ch6);
 				set_servo(7,ch7);
 				receiver_ok=0;
+				LED_on(LED_RC_OK);
 			}
 		}
 		if(rx2_event == 1)
@@ -183,6 +182,7 @@ int main(void)
 				set_servo(5,ch6);
 				set_servo(7,ch7);
 				receiver_ok=0;
+				LED_on(LED_RC_OK);
 			}
 		}
 		if(count_event == 1)
@@ -194,6 +194,7 @@ int main(void)
 			// original receiver diables PWM after two seconds
 			if(receiver_ok > 20000)
 			{
+				LED_fastBlink(LED_RC_OK);
 				TIM_Cmd(TIM3, DISABLE);
 				TIM_Cmd(TIM4, DISABLE);
 				receiver_off = 1;
@@ -222,12 +223,8 @@ int main(void)
 			}
 
 			led_counter++;
-			if(led_counter & 8)
-			{	
-				led_event();
-			}
 
-			if(led_counter > 600)
+			if(led_counter > 1000)
 			{	
 				led_event();
 				led_counter=0;
@@ -243,14 +240,10 @@ int main(void)
 		}
 		if(get_key_press( KEY_B ))
 		{
-			LED_toggle(1<<xx);
-			xx++;
-			if(xx == 16)
+			if( get_key_state(KEY_A | KEY_C) == (KEY_A|KEY_C) )
 			{
-				xx=0;
-			}
-			if( get_key_state(KEY_A | KEY_C) == ((KEY_A|KEY_C)) )
-			{
+				LED_off(LED_CIRCLE);
+				LED_fastBlink(LED_SP1|LED_SP2|LED_BIND);
 				bind_counter=0;
 			}
 		}
