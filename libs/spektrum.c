@@ -13,7 +13,7 @@
  *
  */
 	
-static void SP_GPIO(void)
+static void spektrum_gpio(void)
 {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -25,7 +25,7 @@ static void SP_GPIO(void)
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-static void SP_UART(void)
+static void spektrum_uart(void)
 {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -39,7 +39,7 @@ static void SP_UART(void)
 	GPIO_PinAFConfig(GPIOC, GPIO_PinSource11, GPIO_AF_USART3);
 }
 
-void Spektrum_init(void)
+void spektrum_init(void)
 {
 	//B120 as output
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
@@ -56,15 +56,15 @@ void Spektrum_init(void)
 	//enable C7 C11 UART RX
 	//dma usart init
 	
-	SP_UART();
-	UART_Init();
+	spektrum_uart();
+	uart_init();
 
 	//powerup
 	GPIOB->ODR           &=       ~(1<<12);
 
 }
 
-void Spektrum_bind(uint32_t counter)
+void spektrum_bind(uint32_t counter)
 {
 	if(counter == 0)
 	{
@@ -72,7 +72,7 @@ void Spektrum_bind(uint32_t counter)
 		//disable DMA C7 C11
 		//TODO
 		//
-		SP_GPIO();
+		spektrum_gpio();
 	
 		//powerdown
 		GPIOB->ODR           |=       (1<<12);
@@ -142,12 +142,12 @@ void Spektrum_bind(uint32_t counter)
 	if(counter == 3999)
 	{
 		//disable GPIO C7 C11 -> enable  UART RX
-		SP_UART();
+		spektrum_uart();
 
 		//reenable DMA C7 C11
 		//TODO
 	
-		LED_off(LED_SP1|LED_SP2|LED_BIND);
+		led_off(LED_SP1|LED_SP2|LED_BIND);
 	}
 
 }

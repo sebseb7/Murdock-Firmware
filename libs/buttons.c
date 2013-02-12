@@ -5,7 +5,7 @@ static uint16_t key_state;
 static uint16_t key_press;
 
 
-void sample_buttons(void)
+void buttons_sample(void)
 {
 	static uint16_t ct0, ct1;
 	
@@ -24,7 +24,7 @@ void sample_buttons(void)
 }
 	
 //C6 as button input
-void INIT_Buttons(void)
+void buttons_init(void)
 {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -36,15 +36,15 @@ void INIT_Buttons(void)
 }
 
 
-uint16_t get_key_press( uint16_t key_mask )
+uint16_t buttons_get_press( uint16_t key_mask )
 {
 	key_mask &= key_press;                          // read key(s)
 	key_press ^= key_mask;                          // clear key(s)
 	return key_mask;
 }
 
-uint16_t get_key_state( uint16_t key_mask )
+uint16_t buttons_get_state( uint16_t key_mask )
 {
-	return key_mask & key_press;
+	return key_mask & key_state;
 }
 

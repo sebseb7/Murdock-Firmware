@@ -33,13 +33,13 @@
 #define LED_CAL LED_MAG_CAL|LED_GYRO_CAL|LED_STICK_CAL
 #define LED_ALL LED_CIRCLE|LED_OK|LED_CAL|LED_MODE|LED_SETUP
 
-void INIT_Leds(void);
+void led_init(void);
 void led_event(void);
 
-void LED_on(uint16_t led);
-void LED_off(uint16_t led);
-void LED_toggle(uint16_t led);
-void LED_slowBlink(uint16_t led);
-void LED_fastBlink(uint16_t led);
+void led_on(uint16_t led);
+void led_off(uint16_t led);
+void led_toggle(uint16_t led);
+void led_slowBlink(uint16_t led);
+void led_fastBlink(uint16_t led);
 
 #endif

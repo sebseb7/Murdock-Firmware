@@ -29,7 +29,7 @@ void usb_serial_init(void)
 
 }
 
-void usbprintf(const char* text, ...)
+void usb_printf(const char* text, ...)
 {
 	char line[256];
 	va_list args;

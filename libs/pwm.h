@@ -4,7 +4,7 @@
 
 #include "main.h"
 
-void PWM_Init(void);
+void pwm_init(void);
 void set_servo(uint32_t servo,float value);
 
 

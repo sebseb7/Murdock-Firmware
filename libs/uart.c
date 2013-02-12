@@ -3,17 +3,18 @@
 
 
 #define RXBUFFERSIZE 16
-uint8_t Rx1Buffer [RXBUFFERSIZE];
-uint8_t Rx2Buffer [RXBUFFERSIZE];
+
+static uint8_t rx1buffer [RXBUFFERSIZE];
+static uint8_t rx2buffer [RXBUFFERSIZE];
 
 
-uint8_t * getRx1Buffer(void)
+uint8_t * get_rx1_buffer(void)
 {
-	return Rx1Buffer;
+	return rx1buffer;
 }
-uint8_t * getRx2Buffer(void)
+uint8_t * get_rx2_buffer(void)
 {
-	return Rx2Buffer;
+	return rx2buffer;
 }
 
 
@@ -21,7 +22,7 @@ void DMA1_Stream1_IRQHandler(void)
 {
 	if (DMA_GetITStatus(DMA1_Stream1, DMA_IT_TCIF1))
 	{
-		Ch1_rx_complete();
+		ch1_rx_complete();
 		DMA_ClearITPendingBit(DMA1_Stream1, DMA_IT_TCIF1);
 	}
 
@@ -30,13 +31,13 @@ void DMA2_Stream1_IRQHandler(void)
 {
 	if (DMA_GetITStatus(DMA2_Stream1, DMA_IT_TCIF1))
 	{
-		Ch2_rx_complete();
+		ch2_rx_complete();
 		DMA_ClearITPendingBit(DMA2_Stream1, DMA_IT_TCIF1);
 	}
 
 }
 	
-void USART_DMA_Init(void)
+void uart_dma_init(void)
 {
 	DMA_InitTypeDef  DMA_InitStructure;
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
@@ -46,7 +47,7 @@ void USART_DMA_Init(void)
 
 	DMA_InitStructure.DMA_Channel = DMA_Channel_4;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory; // Receive
-	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)Rx1Buffer;
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)rx1buffer;
 	DMA_InitStructure.DMA_BufferSize = (uint16_t)RXBUFFERSIZE;
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART3->DR;
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -63,7 +64,7 @@ void USART_DMA_Init(void)
 	DMA_Init(DMA1_Stream1, &DMA_InitStructure);
 
 	DMA_InitStructure.DMA_Channel = DMA_Channel_5;
-	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)Rx2Buffer;
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)rx2buffer;
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART6->DR;
 	DMA_Init(DMA2_Stream1, &DMA_InitStructure);
 
@@ -79,12 +80,12 @@ void USART_DMA_Init(void)
 	DMA_Cmd(DMA2_Stream1, ENABLE);
 }
 
-void UART_Init(void)
+void uart_init(void)
 {
 	for(int i = 0;i<RXBUFFERSIZE;i++)
 	{
-		Rx1Buffer[i]=10;
-		Rx2Buffer[i]=11;
+		rx1buffer[i]=10;
+		rx2buffer[i]=11;
 	}
 	USART_InitTypeDef USART_InitStructure;
 
@@ -119,7 +120,7 @@ void UART_Init(void)
 	NVIC_Init(&NVIC_InitStructure);
 
 
-	USART_DMA_Init();
+	uart_dma_init();
 	
 
 

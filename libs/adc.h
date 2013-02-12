@@ -4,8 +4,8 @@
 #include "main.h"
 
 
-uint16_t getADC_C2(void);
-void ADC_C2_Init(void);
+uint16_t adc_c2_get(void);
+void adc_c2_init(void);
 
 
 #endif

@@ -8,9 +8,9 @@
 #define KEY_C (1<<2)
 
 
-uint16_t get_key_press( uint16_t key_mask );
-uint16_t get_key_state( uint16_t key_mask );
-void sample_buttons(void);
-void INIT_Buttons(void);
+uint16_t buttons_get_press( uint16_t key_mask );
+uint16_t buttons_get_state( uint16_t key_mask );
+void buttons_sample(void);
+void buttons_init(void);
 
 #endif

@@ -10,12 +10,12 @@
 __IO uint16_t ADC3ConvertedValue = 0;
 
 
-uint16_t getADC_C2(void)
+uint16_t acd_c2_get(void)
 {
 	return ADC3ConvertedValue;
 }
 
-void ADC_C2_Init(void)
+void adc_c2_init(void)
 {
 	#define ADC3_DR_ADDRESS    ((uint32_t)0x4001224C)
 	ADC_InitTypeDef       ADC_InitStructure;

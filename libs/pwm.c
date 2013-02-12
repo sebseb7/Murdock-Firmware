@@ -46,7 +46,7 @@ void set_servo(uint32_t servo,float value)
 
 
 
-static void PWM_Tim3_Init(void)
+static void pwm_tim3_init(void)
 {
 	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 	TIM_OCInitTypeDef  TIM_OCInitStructure;
@@ -105,7 +105,7 @@ static void PWM_Tim3_Init(void)
 
 }
 
-static void PWM_Tim4_Init(void)
+static void pwm_tim4_init(void)
 {
 	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 	TIM_OCInitTypeDef  TIM_OCInitStructure;
@@ -157,9 +157,9 @@ static void PWM_Tim4_Init(void)
 
 }
 
-void PWM_Init(void)
+void pwm_init(void)
 {
-	PWM_Tim3_Init();
-	PWM_Tim4_Init();
+	pwm_tim3_init();
+	pwm_tim4_init();
 }
 

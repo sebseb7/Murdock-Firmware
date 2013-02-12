@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-void Spektrum_bind(uint32_t);
-void Spektrum_init(void);
+void spektrum_bind(uint32_t);
+void spektrum_init(void);
 
 #endif

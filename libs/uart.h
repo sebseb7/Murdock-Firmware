@@ -3,9 +3,9 @@
 
 #include "main.h"
 
-void UART_Init(void);
-uint8_t * getRx1Buffer(void);
-uint8_t * getRx2Buffer(void);
-void USART_DMA_Init(void);
+void uart_init(void);
+uint8_t * get_rx1_buffer(void);
+uint8_t * get_rx2_buffer(void);
+void uart_dma_init(void);
 
 #endif

@@ -14,8 +14,8 @@ typedef struct
 #define SIGNATURE_BASE           ((uint32_t )0x1FFF7A10)
 #define SIGNATURE              ((SIGNATURE_TypeDef *) SIGNATURE_BASE)
 
-uint32_t RNG_Get(void);
-void RNG_Enable(void);
-void RNG_Disable(void);
+uint32_t rng_Get(void);
+void rng_enable(void);
+void rng_disable(void);
 
 #endif

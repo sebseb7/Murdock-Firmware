@@ -9,10 +9,10 @@
 
 
 
-static uint16_t led_on = 0;
-static uint16_t led_slowBlink = 0;
-static uint16_t led_fastBlink = 0;
-static uint16_t led_current_state = 0;
+static uint16_t leds_on = 0;
+static uint16_t leds_slowBlink = 0;
+static uint16_t leds_fastBlink = 0;
+static uint16_t leds_current_state = 0;
 
 
 void led_event(void)
@@ -30,44 +30,44 @@ void led_event(void)
 
 	for(unsigned int i = 0;i < 16;i++)
 	{
-		if( (led_on & (1<<i) )&&(~(led_current_state & (1<<i)) ) )
+		if( (leds_on & (1<<i) )&&(~(leds_current_state & (1<<i)) ) )
 		{
 			update = 1;
-			led_current_state |= (1<<i);
+			leds_current_state |= (1<<i);
 		}
-		else if( (~(led_on & (1<<i)) )&&(led_current_state & (1<<i) ) )
+		else if( (~(leds_on & (1<<i)) )&&(leds_current_state & (1<<i) ) )
 		{
 			update = 1;
-			led_current_state &= ~(1<<i);
-		}
-		
-		if( (led_slowBlink & (1<<i) )&&(blink_counter == 0))
-		{
-			update = 1;
-			led_current_state |= (1<<i);
-		}
-		if( (led_slowBlink & (1<<i) )&&(blink_counter == 4))
-		{
-			update = 1;
-			led_current_state &= ~(1<<i);
+			leds_current_state &= ~(1<<i);
 		}
 		
-		if( (led_fastBlink & (1<<i) )&&((blink_counter&1) == 0))
+		if( (leds_slowBlink & (1<<i) )&&(blink_counter == 0))
 		{
 			update = 1;
-			led_current_state |= (1<<i);
+			leds_current_state |= (1<<i);
 		}
-		if( (led_fastBlink & (1<<i) )&&((blink_counter&1) == 1))
+		if( (leds_slowBlink & (1<<i) )&&(blink_counter == 4))
 		{
 			update = 1;
-			led_current_state &= ~(1<<i);
+			leds_current_state &= ~(1<<i);
+		}
+		
+		if( (leds_fastBlink & (1<<i) )&&((blink_counter&1) == 0))
+		{
+			update = 1;
+			leds_current_state |= (1<<i);
+		}
+		if( (leds_fastBlink & (1<<i) )&&((blink_counter&1) == 1))
+		{
+			update = 1;
+			leds_current_state &= ~(1<<i);
 		}
 	}
 	if(update == 1)
 	{
 		for(unsigned int i = 0 ; i < 16;i++)
 		{
-			if(led_current_state & (1<<i))
+			if(leds_current_state & (1<<i))
 			{
 				GPIOA->ODR           &=       ~(1<<2);
 			}
@@ -85,68 +85,68 @@ void led_event(void)
 }
 
 
-void LED_on(uint16_t led)
+void led_on(uint16_t led)
 {
 	for(uint16_t i = 0;i<16;i++)
 	{
 		if(led & (1<<i))
 		{
-			led_on |= (1<<i);
-			led_fastBlink &= ~(1<<i);
-			led_slowBlink &= ~(1<<i);
+			leds_on |= (1<<i);
+			leds_fastBlink &= ~(1<<i);
+			leds_slowBlink &= ~(1<<i);
 		}
 	}
 }
-void LED_off(uint16_t led)
+void led_off(uint16_t led)
 {
 	for(uint16_t i = 0;i<16;i++)
 	{
 		if(led & (1<<i))
 		{
-			led_on &= ~(1<<i);
-			led_fastBlink &= ~(1<<i);
-			led_slowBlink &= ~(1<<i);
+			leds_on &= ~(1<<i);
+			leds_fastBlink &= ~(1<<i);
+			leds_slowBlink &= ~(1<<i);
 		}
 	}
 }
-void LED_toggle(uint16_t led)
+void led_toggle(uint16_t led)
 {
 	for(uint16_t i = 0;i<16;i++)
 	{
 		if(led & (1<<i))
 		{
-			led_on ^= (1<<i);
-			led_fastBlink &= ~(1<<i);
-			led_slowBlink &= ~(1<<i);
+			leds_on ^= (1<<i);
+			leds_fastBlink &= ~(1<<i);
+			leds_slowBlink &= ~(1<<i);
 		}
 	}
 }
-void LED_slowBlink(uint16_t led)
+void led_slowBlink(uint16_t led)
 {
 	for(uint16_t i = 0;i<16;i++)
 	{
 		if(led & (1<<i))
 		{
-			led_slowBlink |= (1<<i);
-			led_fastBlink &= ~(1<<i);
-			led_on &= ~(1<<i);
+			leds_slowBlink |= (1<<i);
+			leds_fastBlink &= ~(1<<i);
+			leds_on &= ~(1<<i);
 		}
 	}
 }
-void LED_fastBlink(uint16_t led)
+void led_fastBlink(uint16_t led)
 {
 	for(uint16_t i = 0;i<16;i++)
 	{
 		if(led & (1<<i))
 		{
-			led_fastBlink |= (1<<i);
-			led_slowBlink &= ~(1<<i);
-			led_on &= ~(1<<i);
+			leds_fastBlink |= (1<<i);
+			leds_slowBlink &= ~(1<<i);
+			leds_on &= ~(1<<i);
 		}
 	}
 }
 
-void INIT_Leds(void)
+void led_init(void)
 {
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
