@@ -10,6 +10,9 @@
 #include "libs/spektrum.h"
 #include "libs/uart.h"
 #include "libs/rng.h"
+#include "libs/i2c.h"
+#include "libs/bmp085.h"
+#include "libs/mpu.h"
 #include "libs/pwm.h"
 
 /*
@@ -76,11 +79,31 @@ int main(void)
 	spektrum_init();
 	
 	pwm_init();
-	
+
+	//MPU & PMA
+	i2c2_init();
+
+	delay(120);
+
+	BMP085_getCalData(); 
+	MPU6050_Initialize();
 
 #ifdef USE_USB_OTG_FS
 	usb_serial_init();
 #endif
+	
+/*	while(1)
+	{
+		for(int i = 0;i<128;i++)
+		{
+			int retval = i2c_start(I2C2, i, I2C_Direction_Transmitter); 
+			i2c_stop(I2C2);
+			usb_printf("%u %u\n",i,retval);
+			delay(100);
+		}	
+		delay(3000);
+	}
+*/	
 
 	uint32_t led_counter = 0;
 	uint32_t bind_counter = 4000;
@@ -226,6 +249,20 @@ int main(void)
 				uint8_t * rx2 = get_rx2_buffer();
 				usb_printf("1: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx1[0],rx1[1],rx1[2],rx1[3],rx1[4],rx1[5],rx1[6],rx1[7],rx1[8],rx1[9],rx1[10],rx1[11],rx1[12],rx1[13],rx1[14],rx1[15]);
 				usb_printf("2: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx2[0],rx2[1],rx2[2],rx2[3],rx2[4],rx2[5],rx2[6],rx2[7],rx2[8],rx2[9],rx2[10],rx2[11],rx2[12],rx2[13],rx2[14],rx2[15]);
+				BMP085_readTemperature();
+				uint16_t temp = BMP085_getTemperatrue();
+				usb_printf("temp: %u\n", temp);
+				
+				int16_t raw[6] = {0,0,0,0,0,0};
+				uint8_t FT[4] = {0,0,0,0};
+				while(MPU6050_GetFIFOCount()==0){delay(1);};
+
+				MPU6050_GetRawAccelGyro(raw);
+				//MPU6050_GetFT(FT);
+				uint8_t test = MPU6050_TestConnection();
+				uint8_t fifo = MPU6050_GetFIFOCount();
+				usb_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
+				MPU6050_ResetFIFOCount();
 #endif
 			}
 
