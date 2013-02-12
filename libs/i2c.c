@@ -80,7 +80,7 @@ uint16_t i2c_start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction){
 }
 
 
-static uint16_t i2c_write(I2C_TypeDef* I2Cx, uint8_t data){
+uint16_t i2c_write(I2C_TypeDef* I2Cx, uint8_t data){
 	I2C_SendData(I2Cx, data);
 	
 	i2c_timeout = TIMEOUT_MAX;
@@ -96,14 +96,14 @@ static uint16_t i2c_write(I2C_TypeDef* I2Cx, uint8_t data){
 // api changes need to continue from here on:
 
 
-static uint8_t i2c_read_ack(I2C_TypeDef* I2Cx){
+uint8_t i2c_read_ack(I2C_TypeDef* I2Cx){
 	I2C_AcknowledgeConfig(I2Cx, ENABLE);
 	while( !I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED) );
 	uint8_t data = I2C_ReceiveData(I2Cx);
 	return data;
 }
 
-static uint8_t i2c_read_nack(I2C_TypeDef* I2Cx){
+uint8_t i2c_read_nack(I2C_TypeDef* I2Cx){
 	I2C_AcknowledgeConfig(I2Cx, DISABLE);
 	while( !I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED) );
 	uint8_t data = I2C_ReceiveData(I2Cx);
