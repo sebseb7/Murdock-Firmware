@@ -7,7 +7,7 @@ LSCRIPT=core/stm32f$(STM32F)xx_flash.ld
 
 OPTIMIZATION = -O2
 
-WITHUSB=0
+WITHUSB=1
 
 
 
