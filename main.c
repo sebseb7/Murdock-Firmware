@@ -15,6 +15,7 @@
 #include "libs/mpu.h"
 #include "libs/pwm.h"
 #include "libs/log.h"
+#include "libs/sbus.h"
 
 /*
  *	boot loader: http://www.st.com/stonline/stappl/st/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/APPLICATION_NOTE/CD00167594.pdf (page 31)
@@ -30,6 +31,7 @@ static __IO uint32_t tick;
 static __IO uint32_t count_event = 0;
 static __IO uint32_t rx1_event = 0;
 static __IO uint32_t rx2_event = 0;
+static __IO uint32_t sbus_event = 0;
 
 void ch1_rx_complete(void)
 {
@@ -38,6 +40,10 @@ void ch1_rx_complete(void)
 void ch2_rx_complete(void)
 {
 	rx2_event = 1;
+}
+void sbus_rx_complete(void)
+{
+	sbus_event = 1;
 }
 
 
@@ -83,6 +89,7 @@ int main(void)
 	buttonsInitialized=1;
 
 	spektrum_init();
+	sbus_init();
 	
 	pwm_init();
 
@@ -198,6 +205,22 @@ int main(void)
 				receiver_ok=0;
 				led_on(LED_RC_OK);
 			}
+		}
+		if(sbus_event == 1)
+		{
+			sbus_event = 0;
+			uint8_t * rx = get_rx_sbus_buffer();
+
+			usb_printf("SBUS: ");
+			for(uint8_t i = 0; i < 25; i++)
+			{
+				usb_printf("%u ",rx[i]);
+			}
+			usb_printf("\n");
+
+
+			receiver_ok=0;
+			led_on(LED_RC_OK);
 		}
 		if(count_event == 1)
 		{

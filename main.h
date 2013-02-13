@@ -9,6 +9,7 @@ uint32_t get_systick(void);
 
 void ch1_rx_complete(void);
 void ch2_rx_complete(void);
+void sbus_rx_complete(void);
 
 
 
