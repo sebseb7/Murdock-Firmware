@@ -45,7 +45,6 @@ void sbus_init(void)
 	
 	{	
 		USART_InitTypeDef USART_InitStructure;
-		USART_ClockInitTypeDef USART_ClockInitStruct;
 
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
@@ -57,10 +56,6 @@ void sbus_init(void)
 		USART_InitStructure.USART_Mode = USART_Mode_Rx;
 		USART_Init(USART2, &USART_InitStructure);
 
-		USART_ClockStructInit( &USART_ClockInitStruct );
-		USART_ClockInitStruct.USART_CPOL = USART_CPOL_High;
-		USART_ClockInit(USART2, &USART_ClockInitStruct);
-	
 		USART_Cmd(USART2, ENABLE);
 		//USART_OverSampling8Cmd(USARTx, ENABLE); 
 	}

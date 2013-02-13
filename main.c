@@ -89,7 +89,7 @@ int main(void)
 	buttonsInitialized=1;
 
 	spektrum_init();
-	sbus_init();
+	//sbus_init();
 	
 	pwm_init();
 
@@ -111,11 +111,22 @@ int main(void)
 
 
 	uint32_t led_counter = 0;
+	uint32_t serial_output_counter = 0;
 	uint32_t bind_counter = 4000;
 	uint32_t button_counter = 0;
 	uint32_t receiver_ok = 0;
 	uint32_t receiver_off = 1;
 	
+
+
+
+	float ch1=0.0f;
+	float ch2=0.0f;
+	float ch3=0.0f;
+	float ch4=0.0f;
+	float ch5=0.0f;
+	float ch6=0.0f;
+	float ch7=0.0f;
 
 
 	while(1)  // main loop
@@ -145,13 +156,13 @@ int main(void)
 			}
 			else
 			{
-				float ch2 = ((((rx[2]&3)<<8)+rx[3]) / 512.0f)-1;
-				float ch6 = ((((rx[4]&3)<<8)+rx[5]) / 512.0f)-1;
-				float ch3 = ((((rx[6]&3)<<8)+rx[7]) / 512.0f)-1;
-				float ch4 = ((((rx[8]&3)<<8)+rx[9]) / 512.0f)-1;
-				float ch1 = ((((rx[10]&3)<<8)+rx[11]) / 512.0f)-1;
-				float ch5 = ((((rx[12]&3)<<8)+rx[13]) / 512.0f)-1;
-				float ch7 = ((((rx[14]&3)<<8)+rx[15]) / 512.0f)-1;
+				ch2 = (((rx[2]&3)<<8)+rx[3]-512) / 350.0f;
+				ch6 = (((rx[4]&3)<<8)+rx[5]-512) / 350.0f;
+				ch3 = (((rx[6]&3)<<8)+rx[7]-512) / 350.0f;
+				ch4 = (((rx[8]&3)<<8)+rx[9]-512) / 350.0f;
+				ch1 = (((rx[10]&3)<<8)+rx[11]-512) / 350.0f;
+				ch5 = (((rx[12]&3)<<8)+rx[13]-512) / 350.0f;
+				ch7 = (((rx[14]&3)<<8)+rx[15]-512) / 350.0f;
 				set_servo(3,ch1);
 				set_servo(1,ch2);
 				set_servo(2,ch3);
@@ -188,13 +199,14 @@ int main(void)
 			}
 			else
 			{
-				float ch2 = ((((rx[2]&3)<<8)+rx[3]) / 512.0f)-1;
-				float ch6 = ((((rx[4]&3)<<8)+rx[5]) / 512.0f)-1;
-				float ch3 = ((((rx[6]&3)<<8)+rx[7]) / 512.0f)-1;
-				float ch4 = ((((rx[8]&3)<<8)+rx[9]) / 512.0f)-1;
-				float ch1 = ((((rx[10]&3)<<8)+rx[11]) / 512.0f)-1;
-				float ch5 = ((((rx[12]&3)<<8)+rx[13]) / 512.0f)-1;
-				float ch7 = ((((rx[14]&3)<<8)+rx[15]) / 512.0f)-1;
+				ch2 = (((rx[2]&3)<<8)+rx[3]-512) / 350.0f;
+				ch6 = (((rx[4]&3)<<8)+rx[5]-512) / 350.0f;
+				ch3 = (((rx[6]&3)<<8)+rx[7]-512) / 350.0f;
+				ch4 = (((rx[8]&3)<<8)+rx[9]-512) / 350.0f;
+				ch1 = (((rx[10]&3)<<8)+rx[11]-512) / 350.0f;
+				ch5 = (((rx[12]&3)<<8)+rx[13]-512) / 350.0f;
+				ch7 = (((rx[14]&3)<<8)+rx[15]-512) / 350.0f;
+
 				set_servo(3,ch1);
 				set_servo(1,ch2);
 				set_servo(2,ch3);
@@ -206,7 +218,7 @@ int main(void)
 				led_on(LED_RC_OK);
 			}
 		}
-		if(sbus_event == 1)
+		/*if(sbus_event == 1)
 		{
 			sbus_event = 0;
 			uint8_t * rx = get_rx_sbus_buffer();
@@ -221,7 +233,7 @@ int main(void)
 
 			receiver_ok=0;
 			led_on(LED_RC_OK);
-		}
+		}*/
 		if(count_event == 1)
 		{
 			count_event = 0;
@@ -283,11 +295,25 @@ int main(void)
 				//MPU6050_GetFT(FT);
 				uint8_t test = MPU6050_TestConnection();
 				uint8_t fifo = MPU6050_GetFIFOCount();
-				usb_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
-				log_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
+				//usb_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
+				//log_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
 				MPU6050_ResetFIFOCount();
 #endif
 			}
+
+#ifdef USE_USB_OTG_FS
+			serial_output_counter++;
+
+			if(serial_output_counter > 220)
+			{
+				serial_output_counter=0;
+				if(receiver_off == 0)
+				{
+					usb_printf("thr:%f ail:%f elev:%f rudd:%f gear:%f\n",ch1,ch2,ch3,ch4,ch5);
+				}
+			}
+#endif
+
 
 		}
 		if(buttons_get_press( KEY_B ))
