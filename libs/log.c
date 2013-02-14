@@ -21,7 +21,6 @@ void log_init(void)
 	int result = disk_initialize(0);
 	if(result == 0)
 	{
-		usb_printf("SD ok\n");
 		f_mount(0, &FATFS_Obj);
 
 		char filename[200];
@@ -38,7 +37,6 @@ void log_init(void)
 		int result = f_open(&file, filename, FA_CREATE_NEW | FA_WRITE);
 		if(result != 0)
 		{
-			usb_printf("file open error\n");
 			led_fastBlink(LED_SDCARD);
 			sd_card_available = 0;
 			return;
@@ -46,7 +44,6 @@ void log_init(void)
 		result = f_sync(&file);
 		if(result != 0)
 		{
-			usb_printf("file sync error\n");
 			led_fastBlink(LED_SDCARD);
 			sd_card_available = 0;
 			return;
@@ -54,19 +51,17 @@ void log_init(void)
 		result = f_lseek(&file, file.fsize);
 		if(result != 0)
 		{
-			usb_printf("file lseek error\n");
 			led_fastBlink(LED_SDCARD);
 			sd_card_available = 0;
 			return;
 		}
-		usb_printf("SD filename: %s\n",filename);
+		//usb_printfi_buffered("SD filename: %s\n",filename);
 		led_on(LED_SDCARD);
 		sd_card_available = 1;
 		
 	}
-	else
 	{
-		usb_printf("no SD\n");
+		//usb_printf_buffered("NO SD");
 	}
 }
 void log_printf(const char* text, ...)
@@ -97,14 +92,12 @@ void log_printf(const char* text, ...)
 
 	if(result != 0)
 	{
-		usb_printf("file write error %u\n",result);
 		led_fastBlink(LED_SDCARD);
 		sd_card_available = 0;
 		return;
 	}
 	if(bw != len)
 	{
-		usb_printf("file write bytes mismatch\n");
 		led_fastBlink(LED_SDCARD);
 		sd_card_available = 0;
 		return;
@@ -114,7 +107,6 @@ void log_printf(const char* text, ...)
 	
 	if(result != 0)
 	{
-		usb_printf("file sync error\n");
 		led_fastBlink(LED_SDCARD);
 		sd_card_available = 0;
 		return;
