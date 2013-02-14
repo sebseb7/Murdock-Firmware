@@ -6,6 +6,8 @@
 #ifdef USE_USB_OTG_FS
 void usb_printf(const char* text, ...);
 void usb_serial_init(void);
+void activate_usb(void);
+void deactivate_usb(void);
 #endif
 
 

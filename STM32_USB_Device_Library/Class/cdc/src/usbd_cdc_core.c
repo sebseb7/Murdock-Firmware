@@ -68,7 +68,7 @@
 #include "usbd_desc.h"
 #include "usbd_req.h"
 
-
+#include "libs/log.h"
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
   */
@@ -541,7 +541,14 @@ static uint8_t  usbd_cdc_Setup (void  *pdev,
       else /* No Data request */
       {
         /* Transfer the command to the interface layer */
-        APP_FOPS.pIf_Ctrl(req->bRequest, NULL, 0);
+		if( (req->bRequest == SET_CONTROL_LINE_STATE)&&((req->wValue==0)||(req->wValue==3)) )
+		{
+        	APP_FOPS.pIf_Ctrl(req->bRequest, NULL, req->wValue);
+		}
+		else
+		{
+        	APP_FOPS.pIf_Ctrl(req->bRequest, NULL, 0);
+		}
       }
       
       return USBD_OK;

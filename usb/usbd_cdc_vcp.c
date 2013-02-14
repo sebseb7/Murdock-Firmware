@@ -32,6 +32,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_vcp.h"
 #include "usb_conf.h"
+#include "libs/usb_serial.h"
+#include "libs/leds.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -164,6 +166,18 @@ static uint16_t VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t __attribute__((__
     break;
 
   case SET_CONTROL_LINE_STATE:
+
+	//got these values by sniffing, don't know what they mean, but 3 comes when a terminal is attached an 0 when the terminal is closed
+	if(Len == 0)
+	{
+		led_off(LED_USB);
+		deactivate_usb();
+	}
+  	if(Len == 3)
+	{
+		led_on(LED_USB);
+		activate_usb();
+	}
     /* Not  needed for this driver */
     break;
 

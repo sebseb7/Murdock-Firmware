@@ -3,6 +3,7 @@
 #include "string.h"
 
 #include "usb_serial.h"
+#include "leds.h"
 
 #ifdef USE_USB_OTG_FS
 
@@ -15,6 +16,7 @@ __ALIGN_BEGIN USB_OTG_CORE_HANDLE    USB_OTG_dev __ALIGN_END ;
 
 extern uint8_t  APP_Rx_Buffer []; 
 extern uint32_t APP_Rx_ptr_in;
+extern uint32_t APP_Rx_ptr_out;
 
 
 void usb_serial_init(void)
@@ -31,8 +33,30 @@ void usb_serial_init(void)
 
 }
 
+static unsigned int good = 0;
+void activate_usb()
+{
+	good = 1;
+}
+void deactivate_usb()
+{
+	good = 0;
+}
+
 void usb_printf(const char* text, ...)
 {
+
+	if(good == 0)
+	{
+		return;
+	}
+
+
+	if(APP_Rx_ptr_in != APP_Rx_ptr_out)
+	{
+		return;
+	}
+
 	char line[256];
 	va_list args;
 	va_start(args,text);
@@ -50,7 +74,6 @@ void usb_printf(const char* text, ...)
 	snprintf(prefix,256,"[%5lu.%03lu] ",seconds,fract);
 	int lenpr = strlen(prefix);
 
-	
 	for(int i=0;i<lenpr;i++)
 	{
 		APP_Rx_Buffer[APP_Rx_ptr_in] = prefix[i];
