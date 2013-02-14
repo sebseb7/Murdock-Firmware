@@ -68,7 +68,6 @@
 #include "usbd_desc.h"
 #include "usbd_req.h"
 
-#include "libs/log.h"
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
   */
