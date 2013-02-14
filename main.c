@@ -101,20 +101,20 @@ int main(void)
 	BMP085_getCalData(); 
 	MPU6050_Initialize();
 
-#ifdef USE_USB_OTG_FS
-	usb_serial_init();
-#endif
 	
 	log_init();
 
 	log_printf("boot\n");
 
+#ifdef USE_USB_OTG_FS
+	usb_serial_init();
+#endif
 
 	uint32_t led_counter = 0;
 	uint32_t serial_output_counter = 0;
 	uint32_t bind_counter = 4000;
 	uint32_t button_counter = 0;
-	uint32_t receiver_ok = 0;
+	uint32_t receiver_ok = 30000;
 	uint32_t receiver_off = 1;
 	
 
