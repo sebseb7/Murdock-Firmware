@@ -42,7 +42,8 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-	FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 1024K
+	FLASH0 (rx)     : ORIGIN = 0x08000000, LENGTH = 32K
+	FLASH (rx)      : ORIGIN = 0x08010000, LENGTH = 960K
 	RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 128K
 	CCMRAM (xrw)    : ORIGIN = 0x10000000, LENGTH = 64K
 	MEMORY_B1 (rx)  : ORIGIN = 0x60000000, LENGTH = 0K
@@ -57,7 +58,7 @@ SECTIONS
 		. = ALIGN(4);
 		KEEP(*(.isr_vector)) /* Startup code */
 		. = ALIGN(4);
-	} >FLASH
+	} >FLASH0
 
 	/* The program code and other data goes into FLASH */
 	.text :
