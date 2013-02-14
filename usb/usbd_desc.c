@@ -61,12 +61,12 @@
   * @{
   */ 
 #define USBD_LANGID_STRING              0x409
-#define USBD_MANUFACTURER_STRING        "SEB"
+#define USBD_MANUFACTURER_STRING        "<<</>>"
 
 #define USBD_PRODUCT_HS_STRING          "STM32 Virtual ComPort in HS mode"
 #define USBD_SERIALNUMBER_HS_STRING     "00000000050B"
 
-#define USBD_PRODUCT_FS_STRING          "USB_SERIAL"
+#define USBD_PRODUCT_FS_STRING          "MURDOCK"
 // for osx: has to be maximum of 8 characters, last character gets overwritten by a 1
 #define USBD_SERIALNUMBER_FS_STRING     "4"
 
