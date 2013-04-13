@@ -356,7 +356,6 @@
 
 
 void MPU6050_Initialize(void);
-void MPU6050_Initialize2(void);
 uint8_t MPU6050_TestConnection(void);
 void MPU6050_GetFT(uint8_t* FT) ;
 uint16_t MPU6050_GetFIFOCount(void);

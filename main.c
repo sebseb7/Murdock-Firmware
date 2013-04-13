@@ -376,7 +376,7 @@ int main(void)
 				led_event();
 				led_counter=0;
 	
-//#ifdef USE_USB_OTG_FS
+#ifdef USE_USB_OTG_FS
 //				uint8_t * rx1 = get_rx1_buffer();
 //				uint8_t * rx2 = get_rx2_buffer();
 //				//usb_printf("1: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx1[0],rx1[1],rx1[2],rx1[3],rx1[4],rx1[5],rx1[6],rx1[7],rx1[8],rx1[9],rx1[10],rx1[11],rx1[12],rx1[13],rx1[14],rx1[15]);
@@ -396,7 +396,7 @@ int main(void)
 //				//usb_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
 //				//log_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
 //				MPU6050_ResetFIFOCount();
-//#endif
+#endif
 			}
 
 #ifdef USE_USB_OTG_FS
@@ -411,6 +411,21 @@ int main(void)
 				}
 			}
 #endif
+
+		{
+			unsigned int mpu_cnt = MPU6050_GetFIFOCount();
+
+			if(mpu_cnt != 0)
+			{
+				int16_t raw[6] = {0,0,0,0,0,0};
+		
+				MPU6050_GetRawAccelGyro(raw);
+				MPU6050_ResetFIFOCount();
+				usb_printf("raw: %u %u %i %i %i %i %i %i\n", 1,mpu_cnt,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
+			}
+		}
+
+
 
 
 		}

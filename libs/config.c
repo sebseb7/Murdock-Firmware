@@ -1,7 +1,6 @@
 #include "eeprom.h"
 uint16_t VirtAddVarTab[NB_OF_VAR] = {0x0, 0x1, 0x2};
 uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0};
-uint16_t VarValue = 0;
 
 
 void dummy(void)
