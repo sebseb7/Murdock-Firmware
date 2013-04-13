@@ -243,6 +243,10 @@ int main(void)
 
 				if( (rx[23]&0x8) == 0x8 )
 				{
+					if(sbus_failsafe==0)
+					{
+						log_printf("sbus failsafe\n");
+					}
 					sbus_failsafe=1;
 					receiver_ok=0;
 				}
@@ -250,7 +254,7 @@ int main(void)
 				{
 					sbus_failsafe=0;
 					receiver_ok=0;
-					led_on(LED_RC_OK|LED_SBUS);
+					led_on(LED_RC_OK|LED_SBUS);//so this only once!
 				}
 
 				//parse sbus
@@ -316,20 +320,27 @@ int main(void)
 			// original receiver diables PWM after two seconds
 			if(receiver_ok > 20000)
 			{
-				led_fastBlink(LED_RC_OK);
-				led_off(LED_SBUS);
-				TIM_Cmd(TIM3, DISABLE);
-				TIM_Cmd(TIM4, DISABLE);
-				receiver_off = 1;
+				if(receiver_off != 1)
+				{
+					led_fastBlink(LED_RC_OK);
+					led_off(LED_SBUS);
+					TIM_Cmd(TIM3, DISABLE);
+					TIM_Cmd(TIM4, DISABLE);
+					log_printf("receiver lost\n");
+					receiver_off = 1;
+				}
 			}else if(sbus_failsafe == 1)
 			{
-				led_slowBlink(LED_RC_OK);
-				led_slowBlink(LED_SBUS);
-				TIM_Cmd(TIM3, DISABLE);
-				TIM_Cmd(TIM4, DISABLE);
-				receiver_off = 1;
+				if(receiver_off != 2)
+				{
+					led_slowBlink(LED_RC_OK);
+					led_slowBlink(LED_SBUS);
+					TIM_Cmd(TIM3, DISABLE);
+					TIM_Cmd(TIM4, DISABLE);
+					receiver_off = 2;
+				}
 
-			}else if(receiver_off == 1)
+			}else if(receiver_off != 0)
 			{
 				receiver_off = 0;
 				TIM_Cmd(TIM3, ENABLE);
@@ -359,27 +370,27 @@ int main(void)
 				led_event();
 				led_counter=0;
 	
-#ifdef USE_USB_OTG_FS
-				uint8_t * rx1 = get_rx1_buffer();
-				uint8_t * rx2 = get_rx2_buffer();
-				//usb_printf("1: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx1[0],rx1[1],rx1[2],rx1[3],rx1[4],rx1[5],rx1[6],rx1[7],rx1[8],rx1[9],rx1[10],rx1[11],rx1[12],rx1[13],rx1[14],rx1[15]);
-				//usb_printf("2: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx2[0],rx2[1],rx2[2],rx2[3],rx2[4],rx2[5],rx2[6],rx2[7],rx2[8],rx2[9],rx2[10],rx2[11],rx2[12],rx2[13],rx2[14],rx2[15]);
-				BMP085_readTemperature();
-				uint16_t temp = BMP085_getTemperatrue();
-				//usb_printf("temp: %u\n", temp);
-				
-				int16_t raw[6] = {0,0,0,0,0,0};
-				uint8_t FT[4] = {0,0,0,0};
-				while(MPU6050_GetFIFOCount()==0){delay(1);};
-
-				MPU6050_GetRawAccelGyro(raw);
-				//MPU6050_GetFT(FT);
-				uint8_t test = MPU6050_TestConnection();
-				uint8_t fifo = MPU6050_GetFIFOCount();
-				//usb_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
-				//log_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
-				MPU6050_ResetFIFOCount();
-#endif
+//#ifdef USE_USB_OTG_FS
+//				uint8_t * rx1 = get_rx1_buffer();
+//				uint8_t * rx2 = get_rx2_buffer();
+//				//usb_printf("1: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx1[0],rx1[1],rx1[2],rx1[3],rx1[4],rx1[5],rx1[6],rx1[7],rx1[8],rx1[9],rx1[10],rx1[11],rx1[12],rx1[13],rx1[14],rx1[15]);
+//				//usb_printf("2: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n", rx2[0],rx2[1],rx2[2],rx2[3],rx2[4],rx2[5],rx2[6],rx2[7],rx2[8],rx2[9],rx2[10],rx2[11],rx2[12],rx2[13],rx2[14],rx2[15]);
+//				BMP085_readTemperature();
+//				uint16_t temp = BMP085_getTemperatrue();
+//				//usb_printf("temp: %u\n", temp);
+//				
+//				int16_t raw[6] = {0,0,0,0,0,0};
+//				uint8_t FT[4] = {0,0,0,0};
+//				while(MPU6050_GetFIFOCount()==0){delay(1);};
+//
+//				MPU6050_GetRawAccelGyro(raw);
+//				//MPU6050_GetFT(FT);
+//				uint8_t test = MPU6050_TestConnection();
+//				uint8_t fifo = MPU6050_GetFIFOCount();
+//				//usb_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
+//				//log_printf("raw: %u %u %i %i %i %i %i %i\n", test,fifo,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
+//				MPU6050_ResetFIFOCount();
+//#endif
 			}
 
 #ifdef USE_USB_OTG_FS
