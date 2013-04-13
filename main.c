@@ -32,6 +32,7 @@ static __IO uint32_t count_event = 0;
 static __IO uint32_t rx1_event = 0;
 static __IO uint32_t rx2_event = 0;
 static __IO uint32_t sbus_event = 0;
+static uint32_t sbus_failsafe = 0;
 
 void ch1_rx_complete(void)
 {
@@ -226,8 +227,8 @@ int main(void)
 			
 			if( 
 				(rx[0] != 15)||
-				(rx[25] != 0)||
-				((rx[24]&0xf0) != 0)
+				(rx[24] != 0)||
+				((rx[23]&0xf0) != 0)
 			)
 			{
 #ifdef USE_USB_OTG_FS
@@ -238,10 +239,20 @@ int main(void)
 			}
 			else
 			{
+
+				if( (rx[23]&0x8) == 0x8 )
+				{
+					sbus_failsafe=1;
+					receiver_ok=0;
+				}
+				else
+				{
+					sbus_failsafe=0;
+					receiver_ok=0;
+					led_on(LED_RC_OK|LED_SBUS);
+				}
 				usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n",rx[0],rx[1],rx[2],rx[3],rx[4],rx[5],rx[6],rx[7],rx[8],rx[9],rx[10],rx[11],rx[12],rx[13],rx[14],rx[15],rx[16],rx[17],rx[18],rx[19],rx[20],rx[21],rx[22],rx[23],rx[24]);
 
-				receiver_ok=0;
-				led_on(LED_RC_OK|LED_SBUS);
 			}
 
 		}
@@ -258,6 +269,13 @@ int main(void)
 			{
 				led_fastBlink(LED_RC_OK);
 				led_off(LED_SBUS);
+				TIM_Cmd(TIM3, DISABLE);
+				TIM_Cmd(TIM4, DISABLE);
+				receiver_off = 1;
+			}else if(sbus_failsafe == 1)
+			{
+				led_slowBlink(LED_RC_OK);
+				led_slowBlink(LED_SBUS);
 				TIM_Cmd(TIM3, DISABLE);
 				TIM_Cmd(TIM4, DISABLE);
 				receiver_off = 1;
