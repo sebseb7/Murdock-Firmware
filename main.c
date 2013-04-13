@@ -235,7 +235,7 @@ int main(void)
 				usb_printf("sbus out of sync\n");
 #endif
 				log_printf("sbus out of sync\n");
-				delay(5);
+				delay(3);
 				sbus_dma_init();
 			}
 			else
