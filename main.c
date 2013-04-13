@@ -259,7 +259,6 @@ int main(void)
 
 				//parse sbus
 
-				unsigned int curr_byte = 0;
 				unsigned int current_bit_in_byte = 0;
 				unsigned int current_bit_in_ch = 0;
 				unsigned int current_ch = 0;
@@ -305,6 +304,13 @@ int main(void)
 				ch5 = (channels[4]-1024)/-672.0f;
 				ch6 = (channels[5]-1024)/-672.0f;
 				ch7 = (channels[6]-1024)/-672.0f;
+				set_servo(3,ch1);
+				set_servo(1,ch2);
+				set_servo(2,ch3);
+				set_servo(4,ch4);
+				set_servo(6,ch5);
+				set_servo(5,ch6);
+				set_servo(7,ch7);
 
 			}
 
