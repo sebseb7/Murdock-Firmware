@@ -14,6 +14,25 @@ static uint16_t leds_slowBlink = 0;
 static uint16_t leds_fastBlink = 0;
 static uint16_t leds_current_state = 0;
 
+static void update_registers(void)
+{
+	for(unsigned int i = 0 ; i < 16;i++)
+	{
+		if(leds_current_state & (1<<i))
+		{
+			GPIOA->ODR           &=       ~(1<<2);
+		}
+		else
+		{
+			GPIOA->ODR           |=       (1<<2);
+		}
+		GPIOC->ODR           |=       (1<<5);
+		GPIOC->ODR           &=       ~(1<<5);
+		
+	}
+	GPIOA->ODR           |=       (1<<3);
+	GPIOA->ODR           &=       ~(1<<3);
+}
 
 void led_event(void)
 {
@@ -65,22 +84,7 @@ void led_event(void)
 	}
 	if(update == 1)
 	{
-		for(unsigned int i = 0 ; i < 16;i++)
-		{
-			if(leds_current_state & (1<<i))
-			{
-				GPIOA->ODR           &=       ~(1<<2);
-			}
-			else
-			{
-				GPIOA->ODR           |=       (1<<2);
-			}
-			GPIOC->ODR           |=       (1<<5);
-			GPIOC->ODR           &=       ~(1<<5);
-			
-		}
-		GPIOA->ODR           |=       (1<<3);
-		GPIOA->ODR           &=       ~(1<<3);
+		update_registers();
 	}
 }
 
@@ -91,11 +95,13 @@ void led_on(uint16_t led)
 	{
 		if(led & (1<<i))
 		{
+			leds_current_state |= (1<<i);
 			leds_on |= (1<<i);
 			leds_fastBlink &= ~(1<<i);
 			leds_slowBlink &= ~(1<<i);
 		}
 	}
+	update_registers();
 }
 void led_off(uint16_t led)
 {
@@ -103,11 +109,13 @@ void led_off(uint16_t led)
 	{
 		if(led & (1<<i))
 		{
+			leds_current_state &= ~(1<<i);
 			leds_on &= ~(1<<i);
 			leds_fastBlink &= ~(1<<i);
 			leds_slowBlink &= ~(1<<i);
 		}
 	}
+	update_registers();
 }
 void led_toggle(uint16_t led)
 {
@@ -115,11 +123,13 @@ void led_toggle(uint16_t led)
 	{
 		if(led & (1<<i))
 		{
+			leds_current_state ^= (1<<i);
 			leds_on ^= (1<<i);
 			leds_fastBlink &= ~(1<<i);
 			leds_slowBlink &= ~(1<<i);
 		}
 	}
+	update_registers();
 }
 void led_slowBlink(uint16_t led)
 {
@@ -171,26 +181,7 @@ void led_init(void)
 	//C5 == clock
 	
 
-	for(int i = 0 ; i < 16;i++)
-	{
-		GPIOC->ODR           |=       (1<<5);
-		__NOP();
-		__NOP();
-		__NOP();
-		GPIOC->ODR           &=       ~(1<<5);
-		__NOP();
-		__NOP();
-		__NOP();
-		
-	}
-	GPIOA->ODR           |=       (1<<3);
-		__NOP();
-		__NOP();
-	__NOP();
-	GPIOA->ODR           &=       ~(1<<3);
-		__NOP();
-		__NOP();
-	__NOP();
+	update_registers();
 
 
 }
