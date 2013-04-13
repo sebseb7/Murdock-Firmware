@@ -7,9 +7,13 @@
 
 void set_servo(uint32_t servo,float value)
 {
-	if ((value < -1.2f)||(value > 1.2f))
+	if(value < -1.2f)
 	{
-		return;
+		value = -1.2f;
+	}
+	if(value > 1.2f)
+	{
+		value= 1.2f;
 	}
 
 	value+=1.0f;
