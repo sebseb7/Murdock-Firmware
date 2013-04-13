@@ -234,6 +234,7 @@ int main(void)
 #ifdef USE_USB_OTG_FS
 				usb_printf("sbus out of sync\n");
 #endif
+				log_printf("sbus out of sync\n");
 				delay(5);
 				sbus_dma_init();
 			}
@@ -288,9 +289,10 @@ int main(void)
 						current_ch++;
 					}
 				}
-
+#ifdef USE_USB_OTG_FS
 				//usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n",rx[0],rx[1],rx[2],rx[3],rx[4],rx[5],rx[6],rx[7],rx[8],rx[9],rx[10],rx[11],rx[12],rx[13],rx[14],rx[15],rx[16],rx[17],rx[18],rx[19],rx[20],rx[21],rx[22],rx[23],rx[24]);
 				//usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u \n",channels[0],channels[1],channels[2],channels[3],channels[4],channels[5],channels[6],channels[7],channels[8],channels[9],channels[10],channels[11]);
+#endif
 
 				ch2 = (channels[0]-1024)/-672.0f;
 				ch3 = (channels[1]-1024)/-672.0f;
