@@ -251,7 +251,54 @@ int main(void)
 					receiver_ok=0;
 					led_on(LED_RC_OK|LED_SBUS);
 				}
-				usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n",rx[0],rx[1],rx[2],rx[3],rx[4],rx[5],rx[6],rx[7],rx[8],rx[9],rx[10],rx[11],rx[12],rx[13],rx[14],rx[15],rx[16],rx[17],rx[18],rx[19],rx[20],rx[21],rx[22],rx[23],rx[24]);
+
+				//parse sbus
+
+				unsigned int curr_byte = 0;
+				unsigned int current_bit_in_byte = 0;
+				unsigned int current_bit_in_ch = 0;
+				unsigned int current_ch = 0;
+				unsigned int current_byte = 1;
+
+				signed int channels[12];
+
+				for(unsigned int i=0;i<12;i++)
+				{
+					channels[i] = 0;
+				}
+
+				for(unsigned int i=0;i<132;i++)
+				{
+					if(rx[current_byte] & (1<<current_bit_in_byte))
+					{
+						channels[current_ch] |= (1<<current_bit_in_ch);
+					}
+
+					current_bit_in_byte++;
+					current_bit_in_ch++;
+
+					if(current_bit_in_byte == 8)
+					{
+						current_bit_in_byte =0;
+						current_byte++;
+					}
+					if(current_bit_in_ch == 11)
+					{
+						current_bit_in_ch =0;
+						current_ch++;
+					}
+				}
+
+				//usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n",rx[0],rx[1],rx[2],rx[3],rx[4],rx[5],rx[6],rx[7],rx[8],rx[9],rx[10],rx[11],rx[12],rx[13],rx[14],rx[15],rx[16],rx[17],rx[18],rx[19],rx[20],rx[21],rx[22],rx[23],rx[24]);
+				//usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u \n",channels[0],channels[1],channels[2],channels[3],channels[4],channels[5],channels[6],channels[7],channels[8],channels[9],channels[10],channels[11]);
+
+				ch2 = (channels[0]-1024)/-672.0f;
+				ch3 = (channels[1]-1024)/-672.0f;
+				ch1 = (channels[2]-1024)/-672.0f;
+				ch4 = (channels[3]-1024)/-672.0f;
+				ch5 = (channels[4]-1024)/-672.0f;
+				ch6 = (channels[5]-1024)/-672.0f;
+				ch7 = (channels[6]-1024)/-672.0f;
 
 			}
 
@@ -341,7 +388,7 @@ int main(void)
 				serial_output_counter=0;
 				if(receiver_off == 0)
 				{
-					//usb_printf("thr:%.3f ail:%.3f elev:%.3f rudd:%.3f gear:%.3f flap:%.3f\n",ch1,ch2,ch3,ch4,ch5,ch6);
+					usb_printf("thr:%.3f ail:%.3f elev:%.3f rudd:%.3f gear:%.3f flap:%.3f\n",ch1,ch2,ch3,ch4,ch5,ch6);
 				}
 			}
 #endif
