@@ -88,8 +88,8 @@ int main(void)
 	buttons_init();
 	buttonsInitialized=1;
 
-	spektrum_init();
-	//sbus_init();
+	//spektrum_init();
+	sbus_init();
 	
 	pwm_init();
 
@@ -131,7 +131,7 @@ int main(void)
 
 	while(1)  // main loop
 	{
-		if(rx1_event == 1)
+/*		if(rx1_event == 1)
 		{
 			rx1_event = 0;
 			uint8_t * rx = get_rx1_buffer();
@@ -218,22 +218,35 @@ int main(void)
 				led_on(LED_RC_OK);
 			}
 		}
-		/*if(sbus_event == 1)
+		*/
+		if(sbus_event == 1)
 		{
 			sbus_event = 0;
 			uint8_t * rx = get_rx_sbus_buffer();
-
-			usb_printf("SBUS: ");
-			for(uint8_t i = 0; i < 25; i++)
+			
+			if( 
+				(rx[0] != 15)||
+				(rx[25] != 0)||
+				((rx[24]&0xf0) != 0)
+			)
 			{
-				usb_printf("%u ",rx[i]);
+#ifdef USE_USB_OTG_FS
+				usb_printf("sbus out of sync\n");
+#endif
+				delay(5);
+				sbus_dma_init();
 			}
-			usb_printf("\n");
+			else
+			{
+				usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n",rx[0],rx[1],rx[2],rx[3],rx[4],rx[5],rx[6],rx[7],rx[8],rx[9],rx[10],rx[11],rx[12],rx[13],rx[14],rx[15],rx[16],rx[17],rx[18],rx[19],rx[20],rx[21],rx[22],rx[23],rx[24]);
+
+				receiver_ok=0;
+				led_on(LED_RC_OK|LED_SBUS);
+			}
+
+		}
 
 
-			receiver_ok=0;
-			led_on(LED_RC_OK);
-		}*/
 		if(count_event == 1)
 		{
 			count_event = 0;
@@ -244,6 +257,7 @@ int main(void)
 			if(receiver_ok > 20000)
 			{
 				led_fastBlink(LED_RC_OK);
+				led_off(LED_SBUS);
 				TIM_Cmd(TIM3, DISABLE);
 				TIM_Cmd(TIM4, DISABLE);
 				receiver_off = 1;
@@ -309,7 +323,7 @@ int main(void)
 				serial_output_counter=0;
 				if(receiver_off == 0)
 				{
-					usb_printf("thr:%.3f ail:%.3f elev:%.3f rudd:%.3f gear:%.3f flap:%.3f\n",ch1,ch2,ch3,ch4,ch5,ch6);
+					//usb_printf("thr:%.3f ail:%.3f elev:%.3f rudd:%.3f gear:%.3f flap:%.3f\n",ch1,ch2,ch3,ch4,ch5,ch6);
 				}
 			}
 #endif
