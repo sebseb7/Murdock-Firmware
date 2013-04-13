@@ -7,4 +7,5 @@
 *.elf
 *.lst
 tools/stm32flash
+.bin
 
