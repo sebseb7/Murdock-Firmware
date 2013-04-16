@@ -1,7 +1,7 @@
 #include "main.h"
 #include "i2c.h"
 
-#define TIMEOUT_MAX    0x9000
+#define TIMEOUT_MAX    0x900
 uint32_t i2c_timeout = TIMEOUT_MAX;
 
 
@@ -28,12 +28,12 @@ void i2c2_init(void){
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_I2C2);	// SCL
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_I2C2); // SDA
 
-	I2C_InitStruct.I2C_ClockSpeed = 100000; 		
+	I2C_InitStruct.I2C_ClockSpeed = 200000; 		
 	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;			
 	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;	
 	I2C_InitStruct.I2C_OwnAddress1 = 0x00;			// own address, not relevant in master mode
-	//I2C_InitStruct.I2C_Ack = I2C_Ack_Disable;		// disable acknowledge when reading (can be changed later on)
-	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
+	I2C_InitStruct.I2C_Ack = I2C_Ack_Disable;		// disable acknowledge when reading (can be changed later on)
+	//I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; 
 	I2C_Init(I2C2, &I2C_InitStruct);				
 
@@ -47,7 +47,7 @@ uint16_t i2c_start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction){
 	i2c_timeout = TIMEOUT_MAX;
 	while(I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
 	{
-		if (i2c_timeout-- == 0) return 1;
+		if (i2c_timeout-- == 0) {I2C_GenerateSTOP(I2Cx, ENABLE);i2c_error(1);return 1;}
 	}
 
 	I2C_GenerateSTART(I2Cx, ENABLE);
@@ -55,7 +55,7 @@ uint16_t i2c_start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction){
 	i2c_timeout = TIMEOUT_MAX;
 	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT))
 	{
-		if (i2c_timeout-- == 0) return 2;
+		if (i2c_timeout-- == 0) {I2C_GenerateSTOP(I2Cx, ENABLE);i2c_error(2);return 2;};
 	}
 
 	I2C_Send7bitAddress(I2Cx, address<<1, direction);
@@ -65,14 +65,14 @@ uint16_t i2c_start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction){
 	{
 		while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
 		{
-			if (i2c_timeout-- == 0) return 3;
+			if (i2c_timeout-- == 0) {I2C_GenerateSTOP(I2Cx, ENABLE);i2c_error(3);return 3;};
 		}
 	}
 	else if(direction == I2C_Direction_Receiver)
 	{
 		while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))
 		{
-			if (i2c_timeout-- == 0) return 4;
+			if (i2c_timeout-- == 0) {I2C_GenerateSTOP(I2Cx, ENABLE);i2c_error(4);return 4;}
 		}
 	}
 
@@ -86,7 +86,7 @@ uint16_t i2c_write(I2C_TypeDef* I2Cx, uint8_t data){
 	i2c_timeout = TIMEOUT_MAX;
 	while(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED))
 	{
-		if (i2c_timeout-- == 0) return 5;
+		if (i2c_timeout-- == 0) {I2C_GenerateSTOP(I2Cx, ENABLE);i2c_error(5);return 5;};
 	}
 	return 0;
 
@@ -96,18 +96,38 @@ uint16_t i2c_write(I2C_TypeDef* I2Cx, uint8_t data){
 // api changes need to continue from here on:
 
 
-uint8_t i2c_read_ack(I2C_TypeDef* I2Cx){
+uint8_t i2c_read_ack(I2C_TypeDef* I2Cx,uint8_t *result){
 	I2C_AcknowledgeConfig(I2Cx, ENABLE);
-	while( !I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED) );
-	uint8_t data = I2C_ReceiveData(I2Cx);
-	return data;
+	uint16_t timeout = 10000;
+	while( (timeout > 0)&&(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED)) )
+	{
+		timeout--;
+	}
+	if(timeout==0)
+	{
+		I2C_GenerateSTOP(I2Cx, ENABLE);
+		i2c_error(6);
+		return 0;
+	}
+	*result = I2C_ReceiveData(I2Cx);
+	return 1;
 }
 
-uint8_t i2c_read_nack(I2C_TypeDef* I2Cx){
+uint8_t i2c_read_nack(I2C_TypeDef* I2Cx,uint8_t *result ){
 	I2C_AcknowledgeConfig(I2Cx, DISABLE);
-	while( !I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED) );
-	uint8_t data = I2C_ReceiveData(I2Cx);
-	return data;
+	uint16_t timeout = 10000;
+	while( (timeout > 0)&&(!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_RECEIVED)) )
+	{
+		timeout--;
+	}
+	if(timeout==0)
+	{
+		I2C_GenerateSTOP(I2Cx, ENABLE);
+		i2c_error(7);
+		return 0;
+	}
+	*result = I2C_ReceiveData(I2Cx);
+	return 1;
 }
 
 void i2c_stop(I2C_TypeDef* I2Cx){
@@ -131,8 +151,8 @@ int16_t i2c2_reads16(uint8_t addr,uint8_t reg)
 	uint8_t received_data[2];
 
 	i2c_start(I2C2, addr, I2C_Direction_Receiver);
-	received_data[0] = i2c_read_ack(I2C2); 
-	received_data[1] = i2c_read_nack(I2C2); 
+	i2c_read_ack(I2C2,&received_data[0]); 
+	i2c_read_nack(I2C2,&received_data[1]); 
 	i2c_stop(I2C2); 
 
 	return received_data[0] << 8 | received_data[1];
@@ -147,9 +167,9 @@ int32_t i2c2_reads24(uint8_t addr,uint8_t reg)
 	uint8_t received_data[3];
 
 	i2c_start(I2C2, addr, I2C_Direction_Receiver);
-	received_data[0] = i2c_read_ack(I2C2); 
-	received_data[1] = i2c_read_ack(I2C2); 
-	received_data[2] = i2c_read_nack(I2C2); 
+	i2c_read_ack(I2C2,&received_data[0]); 
+	i2c_read_ack(I2C2,&received_data[1]); 
+	i2c_read_nack(I2C2,&received_data[2]); 
 	i2c_stop(I2C2); 
 
 	return (received_data[0] << 16) | (received_data[1] << 8) | received_data[2];
@@ -165,8 +185,8 @@ uint16_t i2c2_readu16(uint8_t addr,uint8_t reg)
 	uint8_t received_data[2];
 
 	i2c_start(I2C2, addr, I2C_Direction_Receiver);
-	received_data[0] = i2c_read_ack(I2C2); 
-	received_data[1] = i2c_read_nack(I2C2); 
+	i2c_read_ack(I2C2,&received_data[0]); 
+	i2c_read_nack(I2C2,&received_data[1]); 
 	i2c_stop(I2C2); 
 
 	return received_data[0] << 8 | received_data[1];
@@ -181,8 +201,8 @@ int16_t i2c2_read16sX(uint8_t addr,uint8_t reg)
 	uint8_t received_data[2];
 
 	i2c_start(I2C2, addr, I2C_Direction_Receiver);
-	received_data[0] = i2c_read_ack(I2C2); 
-	received_data[1] = i2c_read_nack(I2C2); 
+	i2c_read_ack(I2C2,&received_data[0]); 
+	i2c_read_nack(I2C2,&received_data[1]); 
 	i2c_stop(I2C2); 
 
 	return received_data[1] << 8 | received_data[0];
