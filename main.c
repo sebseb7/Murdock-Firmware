@@ -15,6 +15,7 @@
 #include "libs/mpu.h"
 #include "libs/pwm.h"
 #include "libs/log.h"
+#include "libs/imu.h"
 #include "libs/sbus.h"
 
 /*
@@ -33,7 +34,8 @@ static __IO uint32_t rx1_event = 0;
 static __IO uint32_t rx2_event = 0;
 static __IO uint32_t sbus_event = 0;
 static uint32_t sbus_failsafe = 0;
-
+static uint32_t i2c_errors = 0;
+static uint32_t i2c_e[7] = {0,0,0,0,0,0,0};
 void ch1_rx_complete(void)
 {
 	rx1_event = 1;
@@ -45,6 +47,11 @@ void ch2_rx_complete(void)
 void sbus_rx_complete(void)
 {
 	sbus_event = 1;
+}
+
+void i2c_error(uint8_t error)
+{
+	i2c_e[error-1]++;
 }
 
 
@@ -69,6 +76,20 @@ uint32_t get_systick(void)
 	return tick;
 }
 
+void enter_system_bootloader(void)
+{
+	void (*SysMemBootJump)(void) = (void (*)(void)) (*((uint32_t *) 0x1FFF0004));
+	__set_PRIMASK(1);
+	RCC_DeInit();
+	SysTick->CTRL = 0;
+	SysTick->LOAD = 0;
+	SysTick->VAL = 0;
+	//RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI);
+//	__set_MSP(0x20001000);
+	__set_MSP(*(volatile unsigned int *)0x1FFFF000);
+	SysMemBootJump();
+	while(1);
+}
 
 int main(void)
 {
@@ -113,6 +134,8 @@ int main(void)
 
 	uint32_t led_counter = 0;
 	uint32_t serial_output_counter = 0;
+	uint32_t mpu_poll_counter = 0;
+	uint32_t mpu_output_counter = 0;
 	uint32_t bind_counter = 4000;
 	uint32_t button_counter = 0;
 	uint32_t receiver_ok = 30000;
@@ -129,6 +152,7 @@ int main(void)
 	float ch6=0.0f;
 	float ch7=0.0f;
 
+	led_fastBlink(LED_SETUP);
 
 	while(1)  // main loop
 	{
@@ -402,28 +426,99 @@ int main(void)
 #ifdef USE_USB_OTG_FS
 			serial_output_counter++;
 
-			if(serial_output_counter > 220)
+			if(serial_output_counter > 2200)
 			{
+				i2c2_init();
 				serial_output_counter=0;
-				if(receiver_off == 0)
+				//if(receiver_off == 0)
 				{
-					usb_printf("thr:%.3f ail:%.3f elev:%.3f rudd:%.3f gear:%.3f flap:%.3f\n",ch1,ch2,ch3,ch4,ch5,ch6);
+					//usb_printf("thr:%.3f ail:%.3f elev:%.3f rudd:%.3f gear:%.3f flap:%.3f\n",ch1,ch2,ch3,ch4,ch5,ch6);
 				}
 			}
 #endif
 
-		{
-			unsigned int mpu_cnt = MPU6050_GetFIFOCount();
 
-			if(mpu_cnt != 0)
+			mpu_poll_counter++;
+
+			if(mpu_poll_counter > 10)
 			{
-				int16_t raw[6] = {0,0,0,0,0,0};
-		
-				MPU6050_GetRawAccelGyro(raw);
-				MPU6050_ResetFIFOCount();
-				usb_printf("raw: %u %u %i %i %i %i %i %i\n", 1,mpu_cnt,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
+				mpu_poll_counter=0;
+
+				unsigned int start_time = get_systick();
+				unsigned int int_status = MPU6050_GetIntStatus();
+				unsigned int diff = get_systick()-start_time;
+				//usb_printf("diff: %i , %i (%i) (%i %i %i %i %i %i %i)\n",diff,int_status,i2c_errors,i2c_e[0],i2c_e[1],i2c_e[2],i2c_e[3],i2c_e[4],i2c_e[5],i2c_e[6]);
+
+
+				if(diff > 10)
+				{
+					log_printf("i2c error\n");
+					i2c_errors++;
+					I2C_Cmd(I2C2, DISABLE);
+					RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, DISABLE);
+					delay(10);
+					i2c2_init();
+				} else if(int_status & 1)
+				{
+					int16_t raw[6] = {0,0,0,0,0,0};
+					unsigned int start_time = get_systick();
+					MPU6050_GetRawAccelGyro(raw);
+					unsigned int diff = get_systick()-start_time;
+
+					if(diff > 10)
+					{
+						log_printf("i2c error\n");
+						i2c_errors++;
+						I2C_Cmd(I2C2, DISABLE);
+						RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, DISABLE);
+						delay(10);
+						i2c2_init();
+					}
+					else
+					{
+						//usb_printf("%6i %6i %6i %6i %6i %6i (%i,%i)  \n",raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],diff,i2c_errors);
+						//usb_printf("VALS: %i %f %f %f %f %f %f %f %i\n",mpu_cnt,q0,q1,q2,q3,yaw,pitch,roll,i2c_errors);
+
+						//		gyro_x = 0;
+						//		gyro_y = 0;
+						//		gyro_z = 0;
+
+
+						float acc_x = raw[0] / 16383.0f;
+						float acc_y = raw[1] / 16383.0f;
+						float acc_z = raw[2] / 16383.0f;
+						//float gyro_x = (raw[3] / 32767.5f) * 2000.0f * (M_PI/180.0f);
+						//float gyro_y = (raw[4] / 32767.5f) * 2000.0f * (M_PI/180.0f);
+						//float gyro_z = (raw[5] / 32767.5f) * 2000.0f * (M_PI/180.0f);
+						// 2000 = 938.7197 ; 1000  = 1877.4395 ; 500 = 3754.8789 ; 250 = 7509.7578
+						float gyro_x = raw[3] / 938.7197f;
+						float gyro_y = raw[4] / 938.7197f;
+						float gyro_z = raw[5] / 938.7197f;
+
+
+						MadgwickAHRSupdateIMU(gyro_x, gyro_y, gyro_z, acc_x, acc_y, acc_z);
+							
+						float yaw;
+						float pitch;
+						float roll;
+						GetEulerAngles(q0,q1,q2,q3,&yaw,&pitch,&roll);
+
+
+#ifdef USE_USB_OTG_FS
+						mpu_output_counter++;
+
+						if(mpu_output_counter > 4)
+						{
+							mpu_output_counter=0;
+							usb_printf(" %f %f %f %f %f %f %f\n",q0,q1,q2,q3,yaw,pitch,roll);
+						}
+#endif
+						log_printf(" %i %i %i %i %i %i %f %f %f %f %f %f %f\n",raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],q0,q1,q2,q3,yaw,pitch,roll);
+					}
+
+
+				}
 			}
-		}
 
 
 
