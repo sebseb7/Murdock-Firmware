@@ -3,27 +3,21 @@
 /*-------------------------------------------*/
 
 #ifndef _INTEGER
+#define _INTEGER
 
-#if 0
+#ifdef _WIN32	/* FatFs development platform */
+
 #include <windows.h>
-#else
+#include <tchar.h>
 
-#if STM32F == 1
-#include "stm32f10x.h"
-#endif
-#if STM32F == 2
-#include "stm32f2xx.h"
-#endif
-#if STM32F == 4
-#include "stm32f4xx.h"
-#endif
+#else			/* Embedded platform */
 
 /* These types must be 16-bit, 32-bit or larger integer */
 typedef int				INT;
 typedef unsigned int	UINT;
 
 /* These types must be 8-bit integer */
-typedef signed char		CHAR;
+typedef char			CHAR;
 typedef unsigned char	UCHAR;
 typedef unsigned char	BYTE;
 
@@ -38,8 +32,6 @@ typedef long			LONG;
 typedef unsigned long	ULONG;
 typedef unsigned long	DWORD;
 
-/* Boolean type */
-// typedef enum { FALSE = 0, TRUE } BOOL;
 #include <stdbool.h>
 typedef bool BOOL;
 #ifndef FALSE
@@ -50,5 +42,4 @@ typedef bool BOOL;
 
 #endif
 
-#define _INTEGER
 #endif
