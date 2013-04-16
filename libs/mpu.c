@@ -26,14 +26,9 @@ void MPU6050_Initialize()
 	MPU6050_SetClockSource(MPU6050_CLOCK_PLL_XGYRO);
 	MPU6050_SetFullScaleAccelRange(MPU6050_ACCEL_FS_2);
 	MPU6050_SetFullScaleGyroRange(MPU6050_GYRO_FS_2000);
-	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x19,5);//sample rate divider
-	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x1A,6);//filter with 94hz (0..6)
-	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_FIFO_EN, MPU6050_TEMP_FIFO_EN_BIT,FALSE);
-	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_FIFO_EN, MPU6050_ACCEL_FIFO_EN_BIT,FALSE);
-	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_FIFO_EN, MPU6050_XG_FIFO_EN_BIT,FALSE);
-	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_FIFO_EN, MPU6050_YG_FIFO_EN_BIT,FALSE);
-	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_FIFO_EN, MPU6050_ZG_FIFO_EN_BIT,TRUE);
-	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_EN_BIT,TRUE);
+	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x19,4);//sample rate divider (50Hz) (19 == 50Hz , 9 == 100Hz , 4 = 200Hz)
+	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x1A,2);//filter with 94hz (0..6)
+	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT,TRUE);
 }
 
 /** Verify the I2C connection.
@@ -47,13 +42,11 @@ uint8_t MPU6050_TestConnection()
 	else
 		return FALSE;
 }
-uint16_t MPU6050_GetFIFOCount() {
-	uint8_t buffer[2]={0,0};
-	MPU6050_I2C_BufferRead(MPU6050_ADDRESS, buffer, MPU6050_RA_FIFO_COUNTH, 2);
-	return (((uint16_t)buffer[0]) << 8) | buffer[1];
-}
-void MPU6050_ResetFIFOCount() {
-	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_USER_CTRL, MPU6050_USERCTRL_FIFO_RESET_BIT, TRUE);
+
+uint8_t MPU6050_GetIntStatus(void) {
+	uint8_t tmp = 0;
+	MPU6050_I2C_BufferRead(MPU6050_ADDRESS, &tmp, MPU6050_RA_INT_STATUS, 1);  
+	return tmp;
 }
 // WHO_AM_I register
 
@@ -353,11 +346,15 @@ void MPU6050_I2C_BufferRead(uint8_t slaveAddr, uint8_t* pBuffer, uint8_t readAdd
 	{
 		if( i == (NumByteToRead-1))
 		{
-			*pBuffer = i2c_read_nack(I2C2);
+			uint8_t result = 0;
+			i2c_read_nack(I2C2,&result);
+			*pBuffer = result;
 		}
 		else
 		{
-			*pBuffer = i2c_read_ack(I2C2);
+			uint8_t result = 0;
+			i2c_read_ack(I2C2,&result);
+			*pBuffer = result;
 		}
 
 		pBuffer++;
