@@ -11,6 +11,7 @@ void ch1_rx_complete(void);
 void ch2_rx_complete(void);
 void sbus_rx_complete(void);
 void i2c_error(uint8_t);
+void event_loop(uint8_t sd_available);
 
 
 #endif
