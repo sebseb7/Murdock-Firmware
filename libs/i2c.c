@@ -1,7 +1,7 @@
 #include "main.h"
 #include "i2c.h"
 
-#define TIMEOUT_MAX    0x900
+#define TIMEOUT_MAX    0x200
 uint32_t i2c_timeout = TIMEOUT_MAX;
 
 
@@ -19,7 +19,7 @@ void i2c2_init(void){
 
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;			
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;	
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;	
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_OD;	
 	//GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;	
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
@@ -28,7 +28,7 @@ void i2c2_init(void){
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_I2C2);	// SCL
 	GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_I2C2); // SDA
 
-	I2C_InitStruct.I2C_ClockSpeed = 200000; 		
+	I2C_InitStruct.I2C_ClockSpeed = 400000; 		
 	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;			
 	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;	
 	I2C_InitStruct.I2C_OwnAddress1 = 0x00;			// own address, not relevant in master mode
