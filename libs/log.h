@@ -5,6 +5,7 @@
 
 void log_init(void);
 void log_printf(const char* text, ...);
+void log_sync(void);
 
 
 #endif

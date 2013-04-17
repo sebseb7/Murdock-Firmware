@@ -102,8 +102,26 @@ void log_printf(const char* text, ...)
 		sd_card_available = 0;
 		return;
 	}
-
-	result = f_sync(&file);
+	
+/*	result = f_sync(&file);
+	
+	if(result != 0)
+	{
+		led_fastBlink(LED_SDCARD);
+		sd_card_available = 0;
+		return;
+	}
+*/
+}
+void log_sync(void)
+{
+	if(sd_card_available == 0)
+	{
+		return;
+	}
+	
+	unsigned int result = f_sync(&file);
+	
 	
 	if(result != 0)
 	{
