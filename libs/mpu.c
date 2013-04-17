@@ -27,7 +27,7 @@ void MPU6050_Initialize()
 	MPU6050_SetFullScaleAccelRange(MPU6050_ACCEL_FS_2);
 	MPU6050_SetFullScaleGyroRange(MPU6050_GYRO_FS_2000);
 	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x19,4);//sample rate divider (50Hz) (19 == 50Hz , 9 == 100Hz , 4 = 200Hz)
-	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x1A,2);//filter with 94hz (0..6)
+	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x1A,3);//filter with 94hz (0..6)
 	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT,TRUE);
 }
 
