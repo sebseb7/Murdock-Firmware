@@ -98,8 +98,6 @@
 
 #include "ff.h"			/* FatFs configurations and declarations */
 #include "diskio.h"		/* Declarations of low level disk I/O functions */
-#include "usb_serial.h"
-#include "main.h"
 
 /*--------------------------------------------------------------------------
 
@@ -737,7 +735,7 @@ FRESULT sync_window (
 	DWORD wsect;
 	UINT nf;
 
-	
+
 	if (fs->wflag) {	/* Write back the sector if it is dirty */
 		wsect = fs->winsect;	/* Current sector number */
 		if (disk_write(fs->drv, fs->win, wsect, 1) != RES_OK)
