@@ -11,6 +11,7 @@
 #include "diskio.h"
 
 DSTATUS disk_initialize (BYTE drv);
+void disk_timerproc(void);
 
 /*static void interface_speed( enum speed_setting speed );
 static BYTE stm32_spi_rw( BYTE out );

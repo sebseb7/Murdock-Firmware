@@ -45,6 +45,10 @@
 #include "diskio.h"
 #include "main.h"
 
+#include "usb_serial.h"
+#include "main.h"
+
+
 // demo uses a command line option to define this (see Makefile):
 // #define STM32_SD_USE_DMA
 
@@ -98,6 +102,10 @@
 #define SPIx_SD_BAUDRATE_SLOW  			SPI_BaudRatePrescaler_128
 #define SPIx_SD_BAUDRATE_FAST  			SPI_BaudRatePrescaler_8
 
+#define DMA_Channel_SPIx_SD_RX    DMA1_Stream4
+#define DMA_Channel_SPIx_SD_TX    DMA1_Stream5
+#define DMA_FLAG_SPI_SD_TC_RX    DMA_FLAG_TCIF4
+#define DMA_FLAG_SPI_SD_TC_TX    DMA_FLAG_TCIF5
 
 /*#define SPI_SD                   SPI2
 #define GPIO_CS                  GPIOC
@@ -105,8 +113,6 @@
 #define GPIO_Pin_CS              GPIO_Pin_7
 #define DMA_Channel_SPI_SD_RX    DMA1_Channel2
 #define DMA_Channel_SPI_SD_TX    DMA1_Channel3
-#define DMA_FLAG_SPI_SD_TC_RX    DMA1_FLAG_TC2
-#define DMA_FLAG_SPI_SD_TC_TX    DMA1_FLAG_TC3
 #define GPIO_SPI_SD              GPIOB
 #define GPIO_Pin_SPI_SD_SCK      GPIO_Pin_10
 #define GPIO_Pin_SPI_SD_MISO     GPIO_Pin_14
@@ -233,11 +239,27 @@ BYTE wait_ready (void)
 	BYTE res;
 
 
+	//uint32_t count=0;
+	//unsigned int start_time = get_systick();
+	unsigned int start_time2 = get_systick();
+
 	Timer2 = 50;	/* Wait for ready in timeout of 500ms */
 	rcvr_spi();
 	do
+	{
 		res = rcvr_spi();
+	//	count++;
+		event_loop(0);
+		if(get_systick()-start_time2 > 20)
+		{
+			//proposal: we can do a IMU/sbus run here as well !
+			start_time2 = get_systick();
+			WWDG_SetCounter(126);
+		}
+	}
 	while ((res != 0xFF) && Timer2);
+	
+	//usb_printf("WAIT: %u %u\n",count,get_systick()-start_time);
 
 	return res;
 }
@@ -279,7 +301,7 @@ void stm32_dma_transfer(
 	DMA_InitStructure.DMA_BufferSize = btr;
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
 	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
-	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+//	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 
 	DMA_DeInit(DMA_Channel_SPIx_SD_RX);
 	DMA_DeInit(DMA_Channel_SPIx_SD_TX);
@@ -288,42 +310,42 @@ void stm32_dma_transfer(
 
 		/* DMA1 channel2 configuration SPI1 RX ---------------------------------------------*/
 		/* DMA1 channel4 configuration SPI2 RX ---------------------------------------------*/
-		DMA_InitStructure.DMA_MemoryBaseAddr = (DWORD)buff;
-		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+		DMA_InitStructure.DMA_Memory0BaseAddr = (DWORD)buff;
+		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-		DMA_Init(DMA_Channel_SPI_SD_RX, &DMA_InitStructure);
+		DMA_Init(DMA_Channel_SPIx_SD_RX, &DMA_InitStructure);
 
 		/* DMA1 channel3 configuration SPI1 TX ---------------------------------------------*/
 		/* DMA1 channel5 configuration SPI2 TX ---------------------------------------------*/
-		DMA_InitStructure.DMA_MemoryBaseAddr = (DWORD)rw_workbyte;
-		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+		DMA_InitStructure.DMA_Memory0BaseAddr = (DWORD)rw_workbyte;
+		DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
-		DMA_Init(DMA_Channel_SPI_SD_TX, &DMA_InitStructure);
+		DMA_Init(DMA_Channel_SPIx_SD_TX, &DMA_InitStructure);
 
 	} else {
 
 #if _FS_READONLY == 0
 		/* DMA1 channel2 configuration SPI1 RX ---------------------------------------------*/
 		/* DMA1 channel4 configuration SPI2 RX ---------------------------------------------*/
-		DMA_InitStructure.DMA_MemoryBaseAddr = (DWORD)rw_workbyte;
-		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+		DMA_InitStructure.DMA_Memory0BaseAddr = (DWORD)rw_workbyte;
+		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
-		DMA_Init(DMA_Channel_SPI_SD_RX, &DMA_InitStructure);
+		DMA_Init(DMA_Channel_SPIx_SD_RX, &DMA_InitStructure);
 
 		/* DMA1 channel3 configuration SPI1 TX ---------------------------------------------*/
 		/* DMA1 channel5 configuration SPI2 TX ---------------------------------------------*/
-		DMA_InitStructure.DMA_MemoryBaseAddr = (DWORD)buff;
-		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+		DMA_InitStructure.DMA_Memory0BaseAddr = (DWORD)buff;
+		DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-		DMA_Init(DMA_Channel_SPI_SD_TX, &DMA_InitStructure);
+		DMA_Init(DMA_Channel_SPIx_SD_TX, &DMA_InitStructure);
 #endif
 
 	}
 
 	/* Enable DMA RX Channel */
-	DMA_Cmd(DMA_Channel_SPI_SD_RX, ENABLE);
+	DMA_Cmd(DMA_Channel_SPIx_SD_RX, ENABLE);
 	/* Enable DMA TX Channel */
-	DMA_Cmd(DMA_Channel_SPI_SD_TX, ENABLE);
+	DMA_Cmd(DMA_Channel_SPIx_SD_TX, ENABLE);
 
 	/* Enable SPI TX/RX request */
 	SPI_I2S_DMACmd(SPIx_SD, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, ENABLE);
@@ -331,14 +353,14 @@ void stm32_dma_transfer(
 	/* Wait until DMA1_Channel 3 Transfer Complete */
 	/// not needed: while (DMA_GetFlagStatus(DMA_FLAG_SPI_SD_TC_TX) == RESET) { ; }
 	/* Wait until DMA1_Channel 2 Receive Complete */
-	while (DMA_GetFlagStatus(DMA_FLAG_SPI_SD_TC_RX) == RESET) { ; }
+	while (DMA_GetFlagStatus(DMA_Channel_SPIx_SD_RX,DMA_FLAG_SPI_SD_TC_RX) == RESET) { ; }
 	// same w/o function-call:
 	// while ( ( ( DMA1->ISR ) & DMA_FLAG_SPI_SD_TC_RX ) == RESET ) { ; }
 
 	/* Disable DMA RX Channel */
-	DMA_Cmd(DMA_Channel_SPI_SD_RX, DISABLE);
+	DMA_Cmd(DMA_Channel_SPIx_SD_RX, DISABLE);
 	/* Disable DMA TX Channel */
-	DMA_Cmd(DMA_Channel_SPI_SD_TX, DISABLE);
+	DMA_Cmd(DMA_Channel_SPIx_SD_TX, DISABLE);
 
 	/* Disable SPI RX/TX request */
 	SPI_I2S_DMACmd(SPIx_SD, SPI_I2S_DMAReq_Rx | SPI_I2S_DMAReq_Tx, DISABLE);
@@ -428,7 +450,9 @@ void power_on (void)
 
 #ifdef STM32_SD_USE_DMA
 	/* enable DMA clock */
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+
+	//FIX!
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 #endif
 }
 
@@ -884,6 +908,14 @@ DRESULT disk_ioctl (
 
 	return res;
 }
+void disk_timerproc(void)
+{
+	uint8_t n = Timer1;						/* 100Hz decrement timer */
+	if (n) Timer1 = --n;
+	n = Timer2;
+	if (n) Timer2 = --n;
+}
+
 #endif /* _USE_IOCTL != 0 */
 
 
