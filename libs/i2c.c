@@ -32,8 +32,8 @@ void i2c2_init(void){
 	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;			
 	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;	
 	I2C_InitStruct.I2C_OwnAddress1 = 0x00;			// own address, not relevant in master mode
-	I2C_InitStruct.I2C_Ack = I2C_Ack_Disable;		// disable acknowledge when reading (can be changed later on)
-	//I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
+	//I2C_InitStruct.I2C_Ack = I2C_Ack_Disable;		// disable acknowledge when reading (can be changed later on)
+	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit; 
 	I2C_Init(I2C2, &I2C_InitStruct);				
 
