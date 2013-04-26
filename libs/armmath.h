@@ -11,4 +11,7 @@ uint16_t randr(uint16_t start,uint16_t end);
 float _sinf(float theta);
 float _cosf(float theta);
 
+float __VSQRTF(float op1);
+
+
 #endif
