@@ -18,6 +18,7 @@
 #include "imu.h"
 #include "armmath.h"
 #include <math.h>
+#include "main.h"
 
 //---------------------------------------------------------------------------------------------------
 // Definitions
@@ -212,31 +213,11 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 	q3 *= recipNorm;
 }
 
-//---------------------------------------------------------------------------------------------------
-// Fast inverse square-root
-// See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
 
 
-
-static float invSqrt(float x) {
-
-//	float result;
-//	__ASM volatile ("vsqrt.f32 %0, %1#" : "=w" (result) : "w" (x) );
-//	return 1/(result);
-
-	return 1/__VSQRTF(x);
-
-//unsigned int i = 0x5F1F1412 - (*(unsigned int*)&x >> 1);
-//float tmp = *(float*)&i;
-//float y = tmp * (1.69000231f - 0.714158168f * x * tmp * tmp);
-
-/*	float halfx = 0.5f * x;
-	float y = x;
-	long i = *(long*)&y;
-	i = 0x5f3759df - (i>>1);
-	y = *(float*)&i;
-	y = y * (1.5f - (halfx * y * y));
-	return y;*/
+static float invSqrt(float x) 
+{
+	return(1.0f/__VSQRTF(x));
 }
 
 void GetEulerAngles(float q0,float q1, float q2, float q3, float* yaw, float* pitch, float* roll)
