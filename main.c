@@ -591,7 +591,6 @@ void event_loop(uint8_t sd_available)
 
 				}
 
-
 			}
 
 

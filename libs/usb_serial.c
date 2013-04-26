@@ -87,6 +87,7 @@ void usb_printf(const char* text, ...)
 	}
 
 
+
 	for(int i=0;i<len;i++)
 	{
 		APP_Rx_Buffer[APP_Rx_ptr_in] = line[i];
@@ -98,6 +99,19 @@ void usb_printf(const char* text, ...)
 			APP_Rx_ptr_in = 0;
 		}  
 	}
+}
+void usb_write(uint8_t byte)
+{
+
+
+		APP_Rx_Buffer[APP_Rx_ptr_in] = byte ;
+		APP_Rx_ptr_in++;
+
+		/* To avoid buffer overflow */
+		if(APP_Rx_ptr_in >= APP_RX_DATA_SIZE)
+		{
+			APP_Rx_ptr_in = 0;
+		}  
 }
 void write_usb(uint8_t byte)
 {

@@ -1,6 +1,7 @@
 #include "mpu.h"
 #include "main.h"
 #include "i2c.h"
+#include "usb_serial.h"
 
 /** @defgroup MPU6050_Library
  * @{
@@ -336,12 +337,18 @@ void MPU6050_I2C_ByteWrite(uint8_t slaveAddr, uint8_t* pBuffer, uint8_t writeAdd
 void MPU6050_I2C_BufferRead(uint8_t slaveAddr, uint8_t* pBuffer, uint8_t readAddr, uint16_t NumByteToRead)
 {
 	i2c_start(I2C2, slaveAddr, I2C_Direction_Transmitter); 
+	
+	usb_write('a');
+	
 	i2c_write(I2C2, readAddr); 
+	usb_write('b');
 	i2c_stop(I2C2); 
 	
+	usb_write('c');
 
 	i2c_start(I2C2, slaveAddr, I2C_Direction_Receiver);
 
+	usb_write('d');
 	for(int i = 0 ; i < NumByteToRead;i++)
 	{
 		if( i == (NumByteToRead-1))
@@ -359,7 +366,9 @@ void MPU6050_I2C_BufferRead(uint8_t slaveAddr, uint8_t* pBuffer, uint8_t readAdd
 
 		pBuffer++;
 	}
+	usb_write('g');
 
 	i2c_stop(I2C2); 
 
+	usb_write('h');
 }
