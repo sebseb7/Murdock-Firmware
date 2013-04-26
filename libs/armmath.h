@@ -1,6 +1,7 @@
 #ifndef _ARMMATH_H
 #define _ARMMATH_H
 
+#include "main.h"
 #include <stdint.h>
 
 uint16_t sini(uint16_t x);
@@ -10,8 +11,6 @@ float pythagorasf( float side1, float side2 );
 uint16_t randr(uint16_t start,uint16_t end);
 float _sinf(float theta);
 float _cosf(float theta);
-
 float __VSQRTF(float op1);
-
 
 #endif
