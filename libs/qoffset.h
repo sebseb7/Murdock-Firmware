@@ -1,0 +1,1 @@
+../../Murdock-Navigation/libs/qoffset.h
