@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 
 #include "main.h"
 
@@ -18,6 +19,9 @@
 #include "libs/imu.h"
 #include "libs/sbus.h"
 #include "libs/microsd_spi.h"
+#include "libs/pid.h"
+#include "libs/qoffset.h"
+#include "libs/config.h"
 
 /*
  *	boot loader: http://www.st.com/stonline/stappl/st/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/APPLICATION_NOTE/CD00167594.pdf (page 31)
@@ -111,7 +115,9 @@ static	uint32_t bind_counter = 4000;
 static	uint32_t button_counter = 0;
 static	uint32_t receiver_ok = 30000;
 static	uint32_t receiver_off = 1;
-static	uint32_t wwdg_counter=0;;
+static	uint32_t wwdg_counter=0;
+static  uint32_t mode = MODE_NORMAL;
+static  uint32_t autopilot_mode = AP_MODE_FREE;
 
 
 
@@ -122,6 +128,27 @@ static	float ch4=0.0f;
 static	float ch5=0.0f;
 static	float ch6=0.0f;
 static	float ch7=0.0f;
+
+static struct quaternion_t qcorrQ;
+
+struct vector_t measured1;
+struct vector_t measured2;
+
+static	int16_t bias_gyro_x=0;
+static	int16_t bias_gyro_y=0;
+static	int16_t bias_gyro_z=0;
+static	int16_t bias_acc_x=0;
+static	int16_t bias_acc_y=0;
+static	int16_t bias_acc_z=0;
+
+static uint32_t bias_cal_count=0;
+	
+static struct pid_conf_t roll_pid;
+static struct pid_conf_t pitch_pid;
+//struct pid_conf_t alt_pid;
+//struct pid_conf_t heading_pid;
+
+
 
 int main(void)
 {
@@ -142,7 +169,7 @@ int main(void)
 	buttons_init();
 	buttonsInitialized=1;
 
-	//spektrum_init();
+	spektrum_init();
 	sbus_init();
 	
 	pwm_init();
@@ -173,12 +200,26 @@ int main(void)
 
 	led_fastBlink(LED_SETUP);
 
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
+//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
 	/* WWDG clock counter = (PCLK1 (42MHz)/4096)/8 = 1281 Hz (~780 us)  */
-	WWDG_SetPrescaler(WWDG_Prescaler_8);
-	WWDG_SetWindowValue(127);
-	WWDG_Enable(126);
+//	WWDG_SetPrescaler(WWDG_Prescaler_8);
+//	WWDG_SetWindowValue(127);
+//	WWDG_Enable(126);
 
+	pid_init(&roll_pid);
+	pid_init(&pitch_pid);
+	//pid_init(&alt_pid);
+	//pid_init(&heading_pid);
+	
+	pitch_pid.Kp = 3.4f;
+	pitch_pid.Ki = 0.0937f; //langsam 
+	pitch_pid.Kd = 0.0202377f;
+
+	roll_pid.Kp = 3.4f;
+	roll_pid.Ki = 0.0937f; //langsam 
+	roll_pid.Kd = 0.0202377f;
+
+	load_config(&qcorrQ.w,&qcorrQ.x,&qcorrQ.y,&qcorrQ.z,&bias_gyro_x,&bias_gyro_y,&bias_gyro_z,&bias_acc_x,&bias_acc_y,&bias_acc_z);
 
 	while(1)  // main loop
 	{
@@ -356,28 +397,33 @@ void event_loop(uint8_t sd_available)
 			//usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u \n",channels[0],channels[1],channels[2],channels[3],channels[4],channels[5],channels[6],channels[7],channels[8],channels[9],channels[10],channels[11]);
 #endif
 
-			ch2 = (channels[0]-1024)/-672.0f;
-			ch3 = (channels[1]-1024)/-672.0f;
-			ch1 = (channels[2]-1024)/-672.0f;
-			ch4 = (channels[3]-1024)/-672.0f;
-			ch5 = (channels[4]-1024)/-672.0f;
-			ch6 = (channels[5]-1024)/-672.0f;
-			ch7 = (channels[6]-1024)/-672.0f;
+			ch2 = (channels[0]-1024)/672.0f;
+			ch3 = (channels[1]-1024)/672.0f;
+			ch1 = (channels[2]-1024)/672.0f;
+			ch4 = (channels[3]-1024)/672.0f;
+			ch5 = (channels[4]-1024)/672.0f;
+			ch6 = (channels[5]-1024)/672.0f;
+			ch7 = (channels[6]-1024)/672.0f;
 
 			//Nuri aileron mix
-			float servo1 = ch3 *  0.6f - ch2;
-			float servo2 = ch3 * -0.6f - ch2;
+			//float servo1 = ch3 *  0.6f - ch2;
+			//float servo2 = ch3 * -0.6f - ch2;
+			//set_servo(1,servo1);
+			//set_servo(2,servo2);
 
+			if(ch4 < 0.2f)
+			{
+				set_servo(1,ch2);
+				set_servo(2,ch3);
+				set_servo(4,ch2);
+			}
 
 			set_servo(3,ch1);
 
-			set_servo(1,servo1);
-			set_servo(2,servo2);
-
-			set_servo(4,ch4);
-			set_servo(6,ch5);
-			set_servo(5,ch6);
-			set_servo(7,ch7);
+			//set_servo(4,ch4);
+			//set_servo(6,ch5);
+			//set_servo(5,ch6);
+			//set_servo(7,ch7);
 
 		}
 
@@ -541,10 +587,77 @@ void event_loop(uint8_t sd_available)
 						min_acc_x = raw[0];
 					}
 
-					float acc_x = raw[0] / 16383.0f;
-					float acc_y = raw[1] / 16383.0f;
-					float acc_z = raw[2] / 16383.0f;
+					float acc_x = (raw[0] - bias_acc_x) / 16383.0f;
+					float acc_y = (raw[1] - bias_acc_y) / 16383.0f;
+					float acc_z = (raw[2] - bias_acc_z) / 16383.0f;
+					
+					float gyro_x = (raw[3] - bias_gyro_x) / 938.7197f;
+					float gyro_y = (raw[4] - bias_gyro_y) / 938.7197f;
+					float gyro_z = (raw[5] - bias_gyro_z) / 938.7197f;
+					
 					float sum = acc_x*acc_x + acc_y*acc_y + acc_z*acc_z;
+			
+
+
+					if(mode == MODE_CORR_HORIZ)
+					{
+						measured1.x=acc_x;
+						measured1.y=acc_y;
+						measured1.z=acc_z;
+					}
+					if(mode == MODE_CORR_NOSE)
+					{
+						measured2.x=acc_x;
+						measured2.y=acc_y;
+						measured2.z=acc_z;
+					}
+					if(mode == MODE_BIAS_CAL)
+					{
+						bias_cal_count++;
+
+						if( abs(raw[0] - bias_acc_x) > 60)
+						{
+							bias_acc_x = (raw[0]>>1) + (bias_acc_x>>1);
+							bias_cal_count=0;
+						}
+						if( abs(raw[1] - bias_acc_y) > 60)
+						{
+							bias_acc_y = (raw[1]>>1) + (bias_acc_y>>1);
+							bias_cal_count=0;
+						}
+						if( abs((raw[2]-16383) - bias_acc_z) > 60)
+						{
+							bias_acc_z = ((raw[2]-16383)>>1) +  (bias_acc_z>>1);
+							bias_cal_count=0;
+						}
+					
+						if( abs(raw[3] - bias_gyro_x) > 3)
+						{
+							bias_gyro_x = raw[3];
+							bias_cal_count=0;
+						}
+						if( abs(raw[4] - bias_gyro_y) > 3)
+						{
+							bias_gyro_y = raw[4];
+							bias_cal_count=0;
+						}
+						if( abs(raw[5] - bias_gyro_z) > 3)
+						{
+							bias_gyro_z = raw[5];
+							bias_cal_count=0;
+						}
+					
+						//usb_printf(" %i %i %i %i %i %i %i\n",abs(raw[0] - bias_acc_x),abs(raw[1] - bias_acc_y),abs((raw[2]-16383) - bias_acc_z),abs(raw[3] - bias_gyro_x),abs(raw[4] - bias_gyro_y),abs(raw[5] - bias_gyro_x),bias_cal_count);
+					
+						if(bias_cal_count==1000)
+						{
+							mode = MODE_NORMAL;
+							led_off(LED_GYRO_CAL);
+							save_config(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
+						}
+					
+					
+					}
 
 					//full scale (-/+32767.5) is 2000deg/sec
 					//convert to rad/sec
@@ -554,12 +667,6 @@ void event_loop(uint8_t sd_available)
 					//float gyro_z = (raw[5] / 32767.5f) * 2000.0f * (M_PI/180.0f);
 					// 2000 = 938.7197 ; 1000  = 1877.4395 ; 500 = 3754.8789 ; 250 = 7509.7578
 					//
-					raw[3]+=35;
-					raw[4]-=4;
-					raw[5]+=5;
-					float gyro_x = raw[3] / 938.7197f;
-					float gyro_y = raw[4] / 938.7197f;
-					float gyro_z = raw[5] / 938.7197f;
 
 
 					MadgwickAHRSupdateIMU(gyro_x, gyro_y, gyro_z, acc_x, acc_y, acc_z);
@@ -567,16 +674,70 @@ void event_loop(uint8_t sd_available)
 					float yaw;
 					float pitch;
 					float roll;
-					GetEulerAngles(q0,q1,q2,q3,&yaw,&pitch,&roll);
+
+					struct quaternion_t uncorrQ;
+					uncorrQ.w = q0;
+					uncorrQ.x = q1;
+					uncorrQ.y = q2;
+					uncorrQ.z = q3;
+					struct quaternion_t correctedQ = quaternion_mul(&uncorrQ,&qcorrQ);
+
+					GetEulerAngles(correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,&yaw,&pitch,&roll);
+
+			
+			
+					if(ch4 >= 0.2f)
+					{
+						if(autopilot_mode == AP_MODE_FREE)
+						{
+							autopilot_mode = AP_MODE_STAB;
+							led_slowBlink(LED_MODE);
+		
+							pid_reset(&pitch_pid);
+							pid_reset(&roll_pid);
+							
+						}
+
+
+						if(fabsf(roll) < ((float)M_PI/2.0f))
+						{
+							pitch*=-1.0f;
+						}
+						float pitch_deg = (pitch/(float)M_PI)*180.0f;
+						float roll_deg = (roll/(float)M_PI)*180.0f;
+			
+						float elev_out =  pid(&pitch_pid,ch5/5.0f,pitch_deg/90.0f, 0.005f);
+						float ail_out =   pid(&roll_pid,ch6/5.0f,roll_deg/90.0f, 0.005f);
+						
+						set_servo(1,ail_out);
+						set_servo(4,ail_out);
+						set_servo(2,elev_out);
+
+					}
+					else
+					{
+						if(autopilot_mode != AP_MODE_FREE)
+						{
+							autopilot_mode = AP_MODE_FREE;
+							led_off(LED_MODE);
+							
+						}
+					}
+
 						
 					mpu_output_counter++;
 
-					if(mpu_output_counter > 15)
+					if(mpu_output_counter > 7)
 					{
 						mpu_output_counter=0;
 #ifdef USE_USB_OTG_FS
-						//usb_printf(" %f %f %f %f %f %f %f\n",q0,q1,q2,q3,yaw,pitch,roll);
-						usb_printf(" %i %2i %3i %i %f %i %i %i %i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %i %i\n",sd_available,last_write,last_sync,min_acc_x,sum,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],q0,q1,q2,q3,yaw,pitch,roll,ch1,ch2,ch3,ch4,ch5,ch6,ch7,diff,i2c_errors);
+						//usb_printf(" %i %i %i %i %i %i %i\n",raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],bias_cal_count);
+						//usb_printf(" %i %2i %3i %i %f %i %i %i %i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %i %i\n",sd_available,last_write,last_sync,min_acc_x,sum,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],q0,q1,q2,q3,yaw,pitch,roll,ch1,ch2,ch3,ch4,ch5,ch6,ch7,diff,i2c_errors);
+						
+						
+						//usb_printf(" %f %f %f\n",pitch_deg,roll_deg,elev_out);
+						usb_printf("%f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z);
+						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 #endif
 						unsigned int start_time = get_systick();
 						if(sd_available) log_printf(" %2i %3i %i %f %i %i %i %i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %i %i\n",last_write,last_sync,min_acc_x,sum,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],q0,q1,q2,q3,yaw,pitch,roll,ch1,ch2,ch3,ch4,ch5,ch6,ch7,diff,i2c_errors);
@@ -617,6 +778,51 @@ void event_loop(uint8_t sd_available)
 				led_fastBlink(LED_SP1|LED_SP2|LED_BIND);
 				bind_counter=0;
 			}
+		}
+
+		if(buttons_get_press( KEY_C ))
+		{
+			if(mode == MODE_NORMAL)
+			{
+				if( buttons_get_state(KEY_A | KEY_B) == (KEY_A|KEY_B) )
+				{
+					led_fastBlink(LED_GYRO_CAL);
+					mode = MODE_CORR_HORIZ;
+				}
+			} 
+			else if(mode == MODE_CORR_HORIZ)
+			{
+				led_slowBlink(LED_GYRO_CAL);
+				mode = MODE_CORR_NOSE;
+			}
+			else if(mode == MODE_CORR_NOSE)
+			{
+				led_off(LED_GYRO_CAL);
+				mode = MODE_NORMAL;
+				
+				struct vector_t expected1 = {0.0f,0.0f,1.0f};
+				struct vector_t expected2 = {0.0f,1.0f,0.0f};
+				struct quaternion_t tmp = get_corrQ(&expected1,&expected2,&measured1,&measured2);
+				qcorrQ = quaternion_conj(&tmp);
+
+				save_config(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
+
+				//usb_printf("m1: %f %f %f\n",measured1.x,measured1.y,measured1.z);
+				//usb_printf("m2: %f %f %f\n",measured2.x,measured2.y,measured2.z);
+				//usb_printf("corr: %f %f %f %f\n",tmp.w,tmp.x,tmp.y,tmp.z);
+			}
+		}
+		if(buttons_get_press( KEY_A ))
+		{
+			if(mode == MODE_NORMAL)
+			{
+				if( buttons_get_state(KEY_C | KEY_B) == (KEY_C|KEY_B) )
+				{
+					led_on(LED_GYRO_CAL);
+					bias_cal_count=0;
+					mode = MODE_BIAS_CAL;
+				}
+			} 
 		}
 	}
 }
