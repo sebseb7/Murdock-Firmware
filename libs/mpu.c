@@ -1,7 +1,6 @@
 #include "mpu.h"
 #include "main.h"
 #include "i2c.h"
-#include "usb_serial.h"
 
 /** @defgroup MPU6050_Library
  * @{
@@ -28,7 +27,7 @@ void MPU6050_Initialize()
 	MPU6050_SetFullScaleAccelRange(MPU6050_ACCEL_FS_2);
 	MPU6050_SetFullScaleGyroRange(MPU6050_GYRO_FS_2000);
 	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x19,4);//sample rate divider (50Hz) (19 == 50Hz , 9 == 100Hz , 4 = 200Hz)
-	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x1A,3);//filter with 94hz (0..6)
+	MPU6050_I2C_ByteWrite2(MPU6050_ADDRESS, 0x1A,5);//filter with 94hz (0..6)
 	MPU6050_WriteBit(MPU6050_ADDRESS, MPU6050_RA_INT_ENABLE, MPU6050_INTERRUPT_DATA_RDY_BIT,TRUE);
 }
 
@@ -337,18 +336,12 @@ void MPU6050_I2C_ByteWrite(uint8_t slaveAddr, uint8_t* pBuffer, uint8_t writeAdd
 void MPU6050_I2C_BufferRead(uint8_t slaveAddr, uint8_t* pBuffer, uint8_t readAddr, uint16_t NumByteToRead)
 {
 	i2c_start(I2C2, slaveAddr, I2C_Direction_Transmitter); 
-	
-	usb_write('a');
-	
 	i2c_write(I2C2, readAddr); 
-	usb_write('b');
 	i2c_stop(I2C2); 
 	
-	usb_write('c');
 
 	i2c_start(I2C2, slaveAddr, I2C_Direction_Receiver);
 
-	usb_write('d');
 	for(int i = 0 ; i < NumByteToRead;i++)
 	{
 		if( i == (NumByteToRead-1))
@@ -366,9 +359,7 @@ void MPU6050_I2C_BufferRead(uint8_t slaveAddr, uint8_t* pBuffer, uint8_t readAdd
 
 		pBuffer++;
 	}
-	usb_write('g');
 
 	i2c_stop(I2C2); 
 
-	usb_write('h');
 }
