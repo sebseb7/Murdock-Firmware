@@ -220,6 +220,8 @@ int main(void)
 	roll_pid.Kd = 0.0202377f;
 
 	load_config(&qcorrQ.w,&qcorrQ.x,&qcorrQ.y,&qcorrQ.z,&bias_gyro_x,&bias_gyro_y,&bias_gyro_z,&bias_acc_x,&bias_acc_y,&bias_acc_z);
+			
+	log_printf("load config: %f %f %f %f %i %i %i %i %i %i\n",qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
 
 	while(1)  // main loop
 	{
@@ -392,10 +394,6 @@ void event_loop(uint8_t sd_available)
 					current_ch++;
 				}
 			}
-#ifdef USE_USB_OTG_FS
-			//usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n",rx[0],rx[1],rx[2],rx[3],rx[4],rx[5],rx[6],rx[7],rx[8],rx[9],rx[10],rx[11],rx[12],rx[13],rx[14],rx[15],rx[16],rx[17],rx[18],rx[19],rx[20],rx[21],rx[22],rx[23],rx[24]);
-			//usb_printf("SBUS: %u %u %u %u %u %u %u %u %u %u %u %u \n",channels[0],channels[1],channels[2],channels[3],channels[4],channels[5],channels[6],channels[7],channels[8],channels[9],channels[10],channels[11]);
-#endif
 
 			ch2 = (channels[0]-1024)/672.0f;
 			ch3 = (channels[1]-1024)/672.0f;
@@ -595,7 +593,7 @@ void event_loop(uint8_t sd_available)
 					float gyro_y = (raw[4] - bias_gyro_y) / 938.7197f;
 					float gyro_z = (raw[5] - bias_gyro_z) / 938.7197f;
 					
-					float sum = acc_x*acc_x + acc_y*acc_y + acc_z*acc_z;
+					//g forces: float sum = acc_x*acc_x + acc_y*acc_y + acc_z*acc_z;
 			
 
 
@@ -654,6 +652,7 @@ void event_loop(uint8_t sd_available)
 							mode = MODE_NORMAL;
 							led_off(LED_GYRO_CAL);
 							save_config(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
+							log_printf("save config: %f %f %f %f %i %i %i %i %i %i\n",qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
 						}
 					
 					
@@ -740,7 +739,9 @@ void event_loop(uint8_t sd_available)
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 #endif
 						unsigned int start_time = get_systick();
-						if(sd_available) log_printf(" %2i %3i %i %f %i %i %i %i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %i %i\n",last_write,last_sync,min_acc_x,sum,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],q0,q1,q2,q3,yaw,pitch,roll,ch1,ch2,ch3,ch4,ch5,ch6,ch7,diff,i2c_errors);
+						if(sd_available) log_printf("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,ch1,ch2,ch3,ch4,ch5,ch6,ch7);
+						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
+						//if(sd_available) log_printf(" %2i %3i %i %f %i %i %i %i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %i %i\n",last_write,last_sync,min_acc_x,sum,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],q0,q1,q2,q3,yaw,pitch,roll,ch1,ch2,ch3,ch4,ch5,ch6,ch7,diff,i2c_errors);
 						last_write = get_systick()-start_time;
 
 						if(last_sync > 1000)
@@ -806,6 +807,8 @@ void event_loop(uint8_t sd_available)
 				qcorrQ = quaternion_conj(&tmp);
 
 				save_config(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
+	
+				log_printf("save config: %f %f %f %f %i %i %i %i %i %i\n",qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
 
 				//usb_printf("m1: %f %f %f\n",measured1.x,measured1.y,measured1.z);
 				//usb_printf("m2: %f %f %f\n",measured2.x,measured2.y,measured2.z);
