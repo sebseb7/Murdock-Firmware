@@ -781,13 +781,15 @@ void event_loop(uint8_t sd_available)
 						float elev_out =  pid(&pitch_pid,ch5/5.0f,pitch_deg/90.0f, 0.005f);
 						float ail_out =   pid(&roll_pid,ch6/5.0f,roll_deg/90.0f, 0.005f);
 					
-						filtered_pid_roll += ail_out / (float)PID_FILTER_SIZE;
+						ail_out /= (float)PID_FILTER_SIZE;
+						filtered_pid_roll += ail_out;
 						filtered_pid_roll -= filter_pid_roll_window[filter_pid_index];
-						filter_pid_roll_window[filter_pid_index]= elev_out / (float)PID_FILTER_SIZE;
+						filter_pid_roll_window[filter_pid_index]= ail_out;
 						
-						filtered_pid_nick += elev_out / (float)PID_FILTER_SIZE;
+						elev_out /= (float)PID_FILTER_SIZE;
+						filtered_pid_nick += elev_out;
 						filtered_pid_nick -= filter_pid_nick_window[filter_pid_index];
-						filter_pid_nick_window[filter_pid_index]= elev_out / (float)PID_FILTER_SIZE;
+						filter_pid_nick_window[filter_pid_index]= elev_out;
 					
 						filter_pid_index++;
 						if(filter_pid_index == PID_FILTER_SIZE)
