@@ -238,7 +238,7 @@ int main(void)
 	//pid_init(&alt_pid);
 	//pid_init(&heading_pid);
 	
-	pitch_pid.Kp = 3.4f;
+	pitch_pid.Kp = 5.4f;
 	pitch_pid.Ki = 0.0937f; //langsam 
 	pitch_pid.Kd = 0.0202377f;
 
@@ -777,10 +777,15 @@ void event_loop(uint8_t sd_available)
 						}
 						float pitch_deg = (pitch/(float)M_PI)*180.0f;
 						float roll_deg = (roll/(float)M_PI)*180.0f;
+
+
+						pitch_pid.Kp = 5.4f*(ch7+1)*(ch7+1);
+						roll_pid.Kp = 3.4f*(ch7+1)*(ch7+1);
 			
 						float elev_out =  pid(&pitch_pid,ch5/5.0f,pitch_deg/90.0f, 0.005f);
 						float ail_out =   pid(&roll_pid,ch6/5.0f,roll_deg/90.0f, 0.005f);
 					
+						/*
 						ail_out /= (float)PID_FILTER_SIZE;
 						filtered_pid_roll += ail_out;
 						filtered_pid_roll -= filter_pid_roll_window[filter_pid_index];
@@ -798,9 +803,9 @@ void event_loop(uint8_t sd_available)
 
 						ail_out  = filtered_pid_roll;
 						elev_out = filtered_pid_nick;
-						
-						set_servo(1,ail_out);
-						set_servo(4,ail_out);
+						*/
+						set_servo(1,ail_out*-1.0f);
+						set_servo(4,ail_out*-1.0f);
 						set_servo(2,elev_out);
 
 					}
