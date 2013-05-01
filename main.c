@@ -157,6 +157,13 @@ static float filtered_acc_y =0.0f;;
 static float filtered_acc_z =0.0f;;
 static uint32_t filter_acc_index=0;
 
+#define PID_FILTER_SIZE 15
+static float filter_pid_roll_window[ACC_FILTER_SIZE];
+static float filter_pid_nick_window[ACC_FILTER_SIZE];
+static float filtered_pid_roll =0.0f;;
+static float filtered_pid_nick =0.0f;;
+static uint32_t filter_pid_index=0;
+
 int main(void)
 {
 	RCC_ClocksTypeDef RCC_Clocks;
@@ -172,11 +179,17 @@ int main(void)
 //	RNG_Disable();
 
 
-	for(int i = 0;i<10;i++)
+	for(int i = 0;i<ACC_FILTER_SIZE;i++)
 	{
 		filter_acc_x_window[i]=0.0f;
 		filter_acc_y_window[i]=0.0f;
 		filter_acc_z_window[i]=0.0f;
+	}
+
+	for(int i = 0;i<PID_FILTER_SIZE;i++)
+	{
+		filter_pid_roll_window[i]=0.0f;
+		filter_pid_nick_window[i]=0.0f;
 	}
 
 	led_init();
@@ -767,6 +780,22 @@ void event_loop(uint8_t sd_available)
 			
 						float elev_out =  pid(&pitch_pid,ch5/5.0f,pitch_deg/90.0f, 0.005f);
 						float ail_out =   pid(&roll_pid,ch6/5.0f,roll_deg/90.0f, 0.005f);
+					
+						filtered_pid_roll += ail_out / (float)PID_FILTER_SIZE;
+						filtered_pid_roll -= filter_pid_roll_window[filter_pid_index];
+						filter_pid_roll_window[filter_pid_index]= elev_out / (float)PID_FILTER_SIZE;
+						
+						filtered_pid_nick += elev_out / (float)PID_FILTER_SIZE;
+						filtered_pid_nick -= filter_pid_nick_window[filter_pid_index];
+						filter_pid_nick_window[filter_pid_index]= elev_out / (float)PID_FILTER_SIZE;
+					
+						filter_pid_index++;
+						if(filter_pid_index == PID_FILTER_SIZE)
+							filter_pid_index=0;
+					
+
+						ail_out  = filtered_pid_roll;
+						elev_out = filtered_pid_nick;
 						
 						set_servo(1,ail_out);
 						set_servo(4,ail_out);
