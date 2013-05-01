@@ -148,7 +148,14 @@ static struct pid_conf_t pitch_pid;
 //struct pid_conf_t alt_pid;
 //struct pid_conf_t heading_pid;
 
-
+#define ACC_FILTER_SIZE 15
+static float filter_acc_x_window[ACC_FILTER_SIZE];
+static float filter_acc_y_window[ACC_FILTER_SIZE];
+static float filter_acc_z_window[ACC_FILTER_SIZE];
+static float filtered_acc_x =0.0f;;
+static float filtered_acc_y =0.0f;;
+static float filtered_acc_z =0.0f;;
+static uint32_t filter_acc_index=0;
 
 int main(void)
 {
@@ -164,6 +171,13 @@ int main(void)
 //	srand(RNG_Get());
 //	RNG_Disable();
 
+
+	for(int i = 0;i<10;i++)
+	{
+		filter_acc_x_window[i]=0.0f;
+		filter_acc_y_window[i]=0.0f;
+		filter_acc_z_window[i]=0.0f;
+	}
 
 	led_init();
 	buttons_init();
@@ -222,6 +236,19 @@ int main(void)
 	load_config(&qcorrQ.w,&qcorrQ.x,&qcorrQ.y,&qcorrQ.z,&bias_gyro_x,&bias_gyro_y,&bias_gyro_z,&bias_acc_x,&bias_acc_y,&bias_acc_z);
 			
 	log_printf("load config: %f %f %f %f %i %i %i %i %i %i\n",qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
+
+	/*
+	qcorrQ.w=1.0f;
+	qcorrQ.x=0.0f;
+	qcorrQ.y=0.0f;
+	qcorrQ.z=0.0f;
+	bias_gyro_x=0;
+	bias_gyro_y=0;
+	bias_gyro_z=0;
+	bias_acc_x=0;
+	bias_acc_y=0;
+	bias_acc_z=0;
+	*/
 
 	while(1)  // main loop
 	{
@@ -556,6 +583,8 @@ void event_loop(uint8_t sd_available)
 				i2c2_init();
 			} else if(int_status & 1)
 			{
+				// wenn seit ner gewissen zeit int_status nicht mehr 1 war, i2c resetten und mpu neu initialisieren
+
 				int16_t raw[6] = {0,0,0,0,0,0};
 				unsigned int start_time = get_systick();
 				MPU6050_GetRawAccelGyro(raw);
@@ -585,9 +614,12 @@ void event_loop(uint8_t sd_available)
 						min_acc_x = raw[0];
 					}
 
-					float acc_x = (raw[0] - bias_acc_x) / 16383.0f;
-					float acc_y = (raw[1] - bias_acc_y) / 16383.0f;
-					float acc_z = (raw[2] - bias_acc_z) / 16383.0f;
+					float acc_x = (raw[0] - bias_acc_x) / 61436.25f;
+					float acc_y = (raw[1] - bias_acc_y) / 61436.25f;
+					float acc_z = (raw[2] - bias_acc_z) / 61436.25f;
+					//float acc_x = (raw[0] - bias_acc_x) / 16383.0f;
+					//float acc_y = (raw[1] - bias_acc_y) / 16383.0f;
+					//float acc_z = (raw[2] - bias_acc_z) / 16383.0f;
 					
 					float gyro_x = (raw[3] - bias_gyro_x) / 938.7197f;
 					float gyro_y = (raw[4] - bias_gyro_y) / 938.7197f;
@@ -667,6 +699,34 @@ void event_loop(uint8_t sd_available)
 					// 2000 = 938.7197 ; 1000  = 1877.4395 ; 500 = 3754.8789 ; 250 = 7509.7578
 					//
 
+					//acc_x=0;
+					//acc_y=0;
+					//acc_z=0;
+					//gyro_x+=0.057f;
+					//gyro_y-=0.0027;
+					//gyro_z-=0.023f;
+
+
+					filtered_acc_x += acc_x;
+					filtered_acc_x -= filter_acc_x_window[filter_acc_index];
+					filter_acc_x_window[filter_acc_index]=acc_x;
+					
+					filtered_acc_y += acc_y;
+					filtered_acc_y -= filter_acc_y_window[filter_acc_index];
+					filter_acc_y_window[filter_acc_index]=acc_y;
+					
+					filtered_acc_z += acc_z;
+					filtered_acc_z -= filter_acc_z_window[filter_acc_index];
+					filter_acc_z_window[filter_acc_index]=acc_z;
+					
+					filter_acc_index++;
+					if(filter_acc_index == ACC_FILTER_SIZE)
+						filter_acc_index=0;
+					
+
+					acc_x = filtered_acc_x;
+					acc_y = filtered_acc_y;
+					acc_z = filtered_acc_z;
 
 					MadgwickAHRSupdateIMU(gyro_x, gyro_y, gyro_z, acc_x, acc_y, acc_z);
 
