@@ -157,7 +157,7 @@ static float filtered_acc_y =0.0f;;
 static float filtered_acc_z =0.0f;;
 static uint32_t filter_acc_index=0;
 
-#define PID_FILTER_SIZE 15
+#define PID_FILTER_SIZE 5
 static float filter_pid_roll_window[ACC_FILTER_SIZE];
 static float filter_pid_nick_window[ACC_FILTER_SIZE];
 static float filtered_pid_roll =0.0f;;
