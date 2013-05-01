@@ -160,9 +160,9 @@ static uint32_t filter_acc_index=0;
 #define PID_FILTER_SIZE 5
 static float filter_pid_roll_window[ACC_FILTER_SIZE];
 static float filter_pid_nick_window[ACC_FILTER_SIZE];
-static float filtered_pid_roll =0.0f;;
-static float filtered_pid_nick =0.0f;;
-static uint32_t filter_pid_index=0;
+//static float filtered_pid_roll =0.0f;;
+//static float filtered_pid_nick =0.0f;;
+//static uint32_t filter_pid_index=0;
 
 int main(void)
 {
@@ -238,11 +238,11 @@ int main(void)
 	//pid_init(&alt_pid);
 	//pid_init(&heading_pid);
 	
-	pitch_pid.Kp = 5.4f;
+	pitch_pid.Kp = 15.4f;
 	pitch_pid.Ki = 0.0937f; //langsam 
 	pitch_pid.Kd = 0.0202377f;
 
-	roll_pid.Kp = 3.4f;
+	roll_pid.Kp = 10.4f;
 	roll_pid.Ki = 0.0937f; //langsam 
 	roll_pid.Kd = 0.0202377f;
 
@@ -262,6 +262,13 @@ int main(void)
 	bias_acc_y=0;
 	bias_acc_z=0;
 	*/
+	
+	bias_gyro_x=0;
+	bias_gyro_y=0;
+	bias_gyro_z=0;
+	bias_acc_x=0;
+	bias_acc_y=0;
+	bias_acc_z=0;
 
 	while(1)  // main loop
 	{
@@ -660,33 +667,33 @@ void event_loop(uint8_t sd_available)
 
 						if( abs(raw[0] - bias_acc_x) > 60)
 						{
-							bias_acc_x = (raw[0]>>1) + (bias_acc_x>>1);
+							//bias_acc_x = (raw[0]>>1) + (bias_acc_x>>1);
 							bias_cal_count=0;
 						}
 						if( abs(raw[1] - bias_acc_y) > 60)
 						{
-							bias_acc_y = (raw[1]>>1) + (bias_acc_y>>1);
+							//bias_acc_y = (raw[1]>>1) + (bias_acc_y>>1);
 							bias_cal_count=0;
 						}
 						if( abs((raw[2]-16383) - bias_acc_z) > 60)
 						{
-							bias_acc_z = ((raw[2]-16383)>>1) +  (bias_acc_z>>1);
+							//bias_acc_z = ((raw[2]-16383)>>1) +  (bias_acc_z>>1);
 							bias_cal_count=0;
 						}
 					
 						if( abs(raw[3] - bias_gyro_x) > 3)
 						{
-							bias_gyro_x = raw[3];
+							//bias_gyro_x = raw[3];
 							bias_cal_count=0;
 						}
 						if( abs(raw[4] - bias_gyro_y) > 3)
 						{
-							bias_gyro_y = raw[4];
+							//bias_gyro_y = raw[4];
 							bias_cal_count=0;
 						}
 						if( abs(raw[5] - bias_gyro_z) > 3)
 						{
-							bias_gyro_z = raw[5];
+							//bias_gyro_z = raw[5];
 							bias_cal_count=0;
 						}
 					
@@ -782,11 +789,11 @@ void event_loop(uint8_t sd_available)
 						float roll_deg = (roll/(float)M_PI)*180.0f;
 
 
-						pitch_pid.Kp = 5.4f*(ch7+1)*(ch7+1);
-						roll_pid.Kp = 3.4f*(ch7+1)*(ch7+1);
+						pitch_pid.Kp = 15.4f*(ch7+1)*(ch7+1);
+						roll_pid.Kp = 10.4f*(ch7+1)*(ch7+1);
 			
-						float elev_out =  pid(&pitch_pid,ch5/5.0f,pitch_deg/90.0f, 0.005f);
-						float ail_out =   pid(&roll_pid,ch6/5.0f,roll_deg/90.0f, 0.005f);
+						float elev_out =  pid(&pitch_pid,ch5/10.0f,pitch_deg/90.0f, 0.005f);
+						float ail_out =   pid(&roll_pid,ch6/10.0f,roll_deg/90.0f, 0.005f);
 					
 						/*
 						ail_out /= (float)PID_FILTER_SIZE;
@@ -836,7 +843,8 @@ void event_loop(uint8_t sd_available)
 						
 						
 						//usb_printf(" %f %f %f\n",pitch_deg,roll_deg,elev_out);
-						usb_printf("%f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z);
+						//usb_printf("%f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z);
+						usb_printf("%f %f %f %f %i %i %i %i %i %i\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 #endif
 						unsigned int start_time = get_systick();
