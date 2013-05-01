@@ -10,7 +10,6 @@ CFLAGS += -mcpu=cortex-m4 -fsingle-precision-constant -funsigned-char -Wundef -W
 CFLAGS += -I../inc -I../../core -DARM_MATH_CM4 -DUSE_STDPERIPH_DRIVER
 
 SRCS = \
-../src/stm32f4xx_misc.c \
 ../src/stm32f4xx_adc.c \
 ../src/stm32f4xx_can.c \
 ../src/stm32f4xx_crc.c \
@@ -31,6 +30,7 @@ SRCS = \
 ../src/stm32f4xx_hash_sha1.c \
 ../src/stm32f4xx_i2c.c \
 ../src/stm32f4xx_iwdg.c \
+../src/stm32f4xx_misc.c \
 ../src/stm32f4xx_pwr.c \
 ../src/stm32f4xx_rcc.c \
 ../src/stm32f4xx_rng.c \
