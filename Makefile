@@ -67,17 +67,17 @@ SIZE = arm-none-eabi-size
 
 #########################################################################
 
-all: STM32F$(STM32F)_drivers/build/libSTM32F$(STM32F)_drivers.a .bin/$(PROJECT).bin Makefile 
+all: .bin/$(PROJECT).bin Makefile 
 	@$(SIZE) .bin/$(PROJECT).elf
 
-STM32F$(STM32F)_drivers/build/libSTM32F$(STM32F)_drivers.a:
+STM32F$(STM32F)_drivers/build/libSTM32F$(STM32F)xx_drivers.a:
 	@make -C STM32F$(STM32F)_drivers/build
 
 .bin/$(PROJECT).bin: .bin/$(PROJECT).elf Makefile
 	@echo "generating $(PROJECT).bin"
 	@$(OBJCOPY) --strip-unneeded -S -g -R .stack -O binary .bin/$(PROJECT).elf .bin/$(PROJECT).bin
 
-.bin/$(PROJECT).elf: $(OBJECTS) Makefile $(LSCRIPT)
+.bin/$(PROJECT).elf: $(OBJECTS) STM32F$(STM32F)_drivers/build/libSTM32F$(STM32F)xx_drivers.a Makefile $(LSCRIPT)
 	@echo "  LD $(PROJECT).elf"
 	@$(GCC) $(OBJECTS) $(LDFLAGS)  -o .bin/$(PROJECT).elf
 
