@@ -263,12 +263,12 @@ int main(void)
 	bias_acc_z=0;
 	*/
 	
-	bias_gyro_x=0;
-	bias_gyro_y=0;
-	bias_gyro_z=0;
-	bias_acc_x=0;
-	bias_acc_y=0;
-	bias_acc_z=0;
+	bias_gyro_x=-38;
+	bias_gyro_y=-10;
+	bias_gyro_z=-35;
+	bias_acc_x=180;
+	bias_acc_y=-20;
+	bias_acc_z=215;
 
 	while(1)  // main loop
 	{
@@ -844,7 +844,7 @@ void event_loop(uint8_t sd_available)
 						
 						//usb_printf(" %f %f %f\n",pitch_deg,roll_deg,elev_out);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z);
-						usb_printf("%f %f %f %f %i %i %i %i %i %i\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5]);
+						usb_printf("%f %f %f %f %i %i %i %i %i %i\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,raw[0]- bias_acc_x,raw[1]- bias_acc_y,raw[2]- bias_acc_z,raw[3] - bias_gyro_x,raw[4] - bias_gyro_y,raw[5] - bias_gyro_z);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 #endif
 						unsigned int start_time = get_systick();
