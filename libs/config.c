@@ -93,7 +93,7 @@ void load_config(float * w, float * x, float * y , float * z,int16_t * gx,int16_
 
 }
 
-struct packed_config_vars_t
+__attribute__((__packed__)) struct packed_config_vars_t
 {
 	union  
 	{
