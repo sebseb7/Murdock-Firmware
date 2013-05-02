@@ -704,6 +704,7 @@ void event_loop(uint8_t sd_available)
 							mode = MODE_NORMAL;
 							led_off(LED_GYRO_CAL);
 							save_config(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
+							if(sd_available) save_config_sd(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);	
 							log_printf("save config: %f %f %f %f %i %i %i %i %i %i\n",qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
 						}
 					
@@ -916,7 +917,8 @@ void event_loop(uint8_t sd_available)
 				qcorrQ = quaternion_conj(&tmp);
 
 				save_config(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
-	
+				if(sd_available) save_config_sd(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);	
+
 				log_printf("save config: %f %f %f %f %i %i %i %i %i %i\n",qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
 
 				//usb_printf("m1: %f %f %f\n",measured1.x,measured1.y,measured1.z);
