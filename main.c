@@ -796,9 +796,14 @@ void event_loop(uint8_t sd_available)
 						roll_pid.Kp = 6.67f*(ch7+1)*(ch7+1);
 						pitch_pid.Ki = 0.0937f*(ch8+1)*(ch8+1);
 						roll_pid.Ki = 0.0937f*(ch8+1)*(ch8+1);
-			
-						float elev_out =  pid(&pitch_pid,ch5/10.0f,pitch_deg/90.0f, 0.005f);
-						float ail_out =   pid(&roll_pid,ch6/10.0f,roll_deg/90.0f, 0.005f);
+		
+
+						float fbw_pitch = ch3 - 0.450893f;
+						float fbw_roll  = ch2 - 0.013393f;
+
+
+						float elev_out =  pid(&pitch_pid,ch5/10.0f+fbw_pitch,pitch_deg/90.0f, 0.005f);
+						float ail_out =   pid(&roll_pid,ch6/10.0f+fbw_roll,roll_deg/90.0f, 0.005f);
 					
 						/*
 						ail_out /= (float)PID_FILTER_SIZE;
