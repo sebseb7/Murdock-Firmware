@@ -64,6 +64,52 @@ void log_init(void)
 		//usb_printf_buffered("NO SD");
 	}
 }
+
+void write_to_file(const char* fname,uint8_t* buffer, uint32_t length)
+{
+	if(sd_card_available == 0)
+	{
+		return;
+	}
+
+	static FIL file2;
+
+	char filename[200];
+	sprintf(filename,"0:%s",fname);
+	int result = f_open(&file2, filename, FA_CREATE_ALWAYS | FA_WRITE);
+	if(result != 0)
+	{
+		led_fastBlink(LED_SDCARD);
+		sd_card_available = 0;
+		return;
+	}
+	
+	unsigned int bw=0;
+		
+	result = f_write(&file2, buffer, length, &bw);	
+
+	if(result != 0)
+	{
+		led_fastBlink(LED_SDCARD);
+		sd_card_available = 0;
+		return;
+	}
+	if(bw != length)
+	{
+		led_fastBlink(LED_SDCARD);
+		sd_card_available = 0;
+		return;
+	}
+	
+	result = f_close(&file2);
+	if(result != 0)
+	{
+		led_fastBlink(LED_SDCARD);
+		sd_card_available = 0;
+		return;
+	}
+}
+
 void log_printf(const char* text, ...)
 {
 	char tmp[256];

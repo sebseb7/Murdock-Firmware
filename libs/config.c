@@ -2,6 +2,7 @@
 
 #include "eeprom.h"
 #include "config.h"
+#include "log.h"
 
 #include "eeprom_fill.h"
 
@@ -92,5 +93,44 @@ void load_config(float * w, float * x, float * y , float * z,int16_t * gx,int16_
 
 }
 
+struct packed_config_vars_t
+{
+	union  
+	{
+		struct
+		{
+			float w;
+			float x;
+			float y;
+			float z;
+			int16_t gx;
+			int16_t gy;
+			int16_t gz;
+			int16_t ax;
+			int16_t ay;
+			int16_t az;
+		};
+		uint8_t buffer[28];
+	};
+};
 
+void save_config_sd(float w,float x,float y,float z,int16_t gx,int16_t gy,int16_t gz,int16_t ax,int16_t ay,int16_t az)
+{
+	struct packed_config_vars_t  packed_config_vars;
+
+	packed_config_vars.w=w;
+	packed_config_vars.x=x;
+	packed_config_vars.y=y;
+	packed_config_vars.z=z;
+	packed_config_vars.gx=gx;
+	packed_config_vars.gy=gy;
+	packed_config_vars.gz=gz;
+	packed_config_vars.ax=ax;
+	packed_config_vars.ay=ay;
+	packed_config_vars.az=az;
+
+	write_to_file("config.dat",packed_config_vars.buffer,28);
+
+
+}
 
