@@ -128,6 +128,7 @@ static	float ch4=0.0f;
 static	float ch5=0.0f;
 static	float ch6=0.0f;
 static	float ch7=0.0f;
+static	float ch8=0.0f;
 
 static struct quaternion_t qcorrQ;
 
@@ -449,6 +450,7 @@ void event_loop(uint8_t sd_available)
 			ch5 = (channels[4]-1024)/672.0f;
 			ch6 = (channels[5]-1024)/672.0f;
 			ch7 = (channels[6]-1024)/672.0f;
+			ch8 = (channels[7]-1024)/672.0f;
 
 			//Nuri aileron mix
 			//float servo1 = ch3 *  0.6f - ch2;
@@ -790,8 +792,10 @@ void event_loop(uint8_t sd_available)
 						float roll_deg = (roll/(float)M_PI)*180.0f;
 
 
-						pitch_pid.Kp = 15.4f*(ch7+1)*(ch7+1);
-						roll_pid.Kp = 10.4f*(ch7+1)*(ch7+1);
+						pitch_pid.Kp = 9.87f*(ch7+1)*(ch7+1);
+						roll_pid.Kp = 6.67f*(ch7+1)*(ch7+1);
+						pitch_pid.Ki = 0.0937f*(ch8+1)*(ch8+1);
+						roll_pid.Ki = 0.0937f*(ch8+1)*(ch8+1);
 			
 						float elev_out =  pid(&pitch_pid,ch5/10.0f,pitch_deg/90.0f, 0.005f);
 						float ail_out =   pid(&roll_pid,ch6/10.0f,roll_deg/90.0f, 0.005f);
@@ -849,7 +853,7 @@ void event_loop(uint8_t sd_available)
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 #endif
 						unsigned int start_time = get_systick();
-						if(sd_available) log_printf("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ap_roll,ap_nick,pitch_pid.P,pitch_pid.I,pitch_pid.D,roll_pid.P,roll_pid.I,roll_pid.D);
+						if(sd_available) log_printf("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8,ap_roll,ap_nick,pitch_pid.P,pitch_pid.I,pitch_pid.D,roll_pid.P,roll_pid.I,roll_pid.D);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 						//if(sd_available) log_printf(" %2i %3i %i %f %i %i %i %i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %i %i\n",last_write,last_sync,min_acc_x,sum,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],q0,q1,q2,q3,yaw,pitch,roll,ch1,ch2,ch3,ch4,ch5,ch6,ch7,diff,i2c_errors);
 						last_write = get_systick()-start_time;
