@@ -458,7 +458,7 @@ void event_loop(uint8_t sd_available)
 			//set_servo(1,servo1);
 			//set_servo(2,servo2);
 
-			if(ch4 < 0.2f)
+			if(ch4 < -0.2f)
 			{
 				set_servo(1,ch2);
 				set_servo(2,ch3);
@@ -771,7 +771,7 @@ void event_loop(uint8_t sd_available)
 					float ap_nick = 0.0f;
 
 			
-					if(ch4 >= 0.2f)
+					if(ch4 >= -0.2f)
 					{
 						if(autopilot_mode == AP_MODE_FREE)
 						{
@@ -798,8 +798,15 @@ void event_loop(uint8_t sd_available)
 						roll_pid.Ki = 0.0937f*(ch8+1)*(ch8+1);
 		
 
-						float fbw_pitch = ch3 - 0.450893f;
-						float fbw_roll  = ch2 - 0.013393f;
+						float fbw_pitch = 0.0f;
+						float fbw_roll  = 0.0f;
+						
+						
+						if(ch4 <= 0.2f)
+						{
+							ch3 - 0.450893f;
+							ch2 - 0.013393f;
+						}
 
 
 						float elev_out =  pid(&pitch_pid,ch5/10.0f+fbw_pitch,pitch_deg/90.0f, 0.005f);
