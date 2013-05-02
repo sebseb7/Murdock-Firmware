@@ -849,7 +849,7 @@ void event_loop(uint8_t sd_available)
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 #endif
 						unsigned int start_time = get_systick();
-						if(sd_available) log_printf("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ap_roll,ap_nick);
+						if(sd_available) log_printf("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ap_roll,ap_nick,pitch_pid.P,pitch_pid.I,pitch_pid.D,roll_pid.P,roll_pid.I,roll_pid.D);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 						//if(sd_available) log_printf(" %2i %3i %i %f %i %i %i %i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %i %i\n",last_write,last_sync,min_acc_x,sum,raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],q0,q1,q2,q3,yaw,pitch,roll,ch1,ch2,ch3,ch4,ch5,ch6,ch7,diff,i2c_errors);
 						last_write = get_systick()-start_time;
