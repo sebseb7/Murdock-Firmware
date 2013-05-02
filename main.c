@@ -804,8 +804,8 @@ void event_loop(uint8_t sd_available)
 						
 						if(ch4 <= 0.2f)
 						{
-							ch3 - 0.450893f;
-							ch2 - 0.013393f;
+							ch3 -= 0.450893f;
+							ch2 -= 0.013393f;
 						}
 
 
