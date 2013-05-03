@@ -804,8 +804,8 @@ void event_loop(uint8_t sd_available)
 						
 						if(ch4 <= 0.2f)
 						{
-							fbw_pitch = ch3 - 0.450893f;
-							fbw_roll  = ch2 - 0.013393f;
+							fbw_pitch = (ch3 - 0.450893f)* 0.5f;
+							fbw_roll  = (ch2 - 0.013393f)*-0.5f;
 						}
 
 
