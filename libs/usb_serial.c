@@ -54,24 +54,24 @@ void usb_printf(const char* text, ...)
 
 	if(APP_Rx_ptr_in != APP_Rx_ptr_out)
 	{
-		return;
+		//return;
 	}
 
-	char line[256];
+	char line[500];
 	va_list args;
 	va_start(args,text);
-	vsnprintf(line,256,text,args);
+	vsnprintf(line,500,text,args);
 	va_end(args);
 
 	int len = strlen(line);
 
-	char prefix[256];
+	char prefix[500];
 
 	uint32_t millis = get_systick() / 10;
 	uint32_t seconds = millis / 1000;
 	uint32_t fract = millis-(seconds*1000);
 
-	snprintf(prefix,256,"[%5lu.%03lu] ",seconds,fract);
+	snprintf(prefix,500,"[%5lu.%03lu] ",seconds,fract);
 	int lenpr = strlen(prefix);
 
 	for(int i=0;i<lenpr;i++)

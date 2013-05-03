@@ -112,10 +112,10 @@ void write_to_file(const char* fname,uint8_t* buffer, uint32_t length)
 
 void log_printf(const char* text, ...)
 {
-	char tmp[256];
+	char tmp[500];
 	va_list args;
 	va_start(args,text);
-	vsnprintf(tmp,256,text,args);
+	vsnprintf(tmp,500,text,args);
 	va_end(args);
 		
 	if(sd_card_available == 0)
@@ -123,13 +123,13 @@ void log_printf(const char* text, ...)
 		return;
 	}
 	
-	char line[256];
+	char line[500];
 
 	uint32_t millis = get_systick() / 10;
 	uint32_t seconds = millis / 1000;
 	uint32_t fract = millis-(seconds*1000);
 
-	snprintf(line,256,"[%5lu.%03lu] %s",seconds,fract,tmp);
+	snprintf(line,500,"[%5lu.%03lu] %s",seconds,fract,tmp);
 	unsigned int len = strlen(line);
 	
 	unsigned int bw=0;
