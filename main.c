@@ -915,12 +915,14 @@ void event_loop(uint8_t sd_available)
 				{
 					led_fastBlink(LED_GYRO_CAL);
 					mode = MODE_CORR_HORIZ;
+					log_printf("mode level\n");
 				}
 			} 
 			else if(mode == MODE_CORR_HORIZ)
 			{
 				led_slowBlink(LED_GYRO_CAL);
 				mode = MODE_CORR_NOSE;
+				log_printf("mode nose\n");
 			}
 			else if(mode == MODE_CORR_NOSE)
 			{
@@ -930,6 +932,11 @@ void event_loop(uint8_t sd_available)
 				struct vector_t expected1 = {0.0f,0.0f,1.0f};
 				struct vector_t expected2 = {0.0f,1.0f,0.0f};
 				struct quaternion_t tmp = get_corrQ(&expected1,&expected2,&measured1,&measured2);
+				struct quaternion_t tmp2 = get_corrQ_2(&measured1,&measured2);
+
+
+				log_printf("method1 : %f %f %f %f , method2 : %f %f %f %f\n",tmp.w,tmp.x,tmp.y,tmp.z,tmp2.w,tmp2.x,tmp2.y,tmp2.z);
+
 				qcorrQ = quaternion_conj(&tmp);
 
 				save_config(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
