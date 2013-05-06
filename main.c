@@ -929,13 +929,7 @@ void event_loop(uint8_t sd_available)
 				led_off(LED_GYRO_CAL);
 				mode = MODE_NORMAL;
 				
-				struct vector_t expected1 = {0.0f,0.0f,1.0f};
-				struct vector_t expected2 = {0.0f,1.0f,0.0f};
-				struct quaternion_t tmp = get_corrQ(&expected1,&expected2,&measured1,&measured2);
-				struct quaternion_t tmp2 = get_corrQ_2(&measured1,&measured2);
-
-
-				log_printf("method1 : %f %f %f %f , method2 : %f %f %f %f\n",tmp.w,tmp.x,tmp.y,tmp.z,tmp2.w,tmp2.x,tmp2.y,tmp2.z);
+				struct quaternion_t tmp = get_corrQ(&measured1,&measured2);
 
 				qcorrQ = quaternion_conj(&tmp);
 
@@ -943,10 +937,6 @@ void event_loop(uint8_t sd_available)
 				if(sd_available) save_config_sd(qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);	
 
 				log_printf("save config: %f %f %f %f %i %i %i %i %i %i\n",qcorrQ.w,qcorrQ.x,qcorrQ.y,qcorrQ.z,bias_gyro_x,bias_gyro_y,bias_gyro_z,bias_acc_x,bias_acc_y,bias_acc_z);
-
-				//usb_printf("m1: %f %f %f\n",measured1.x,measured1.y,measured1.z);
-				//usb_printf("m2: %f %f %f\n",measured2.x,measured2.y,measured2.z);
-				//usb_printf("corr: %f %f %f %f\n",tmp.w,tmp.x,tmp.y,tmp.z);
 			}
 		}
 		if(buttons_get_press( KEY_A ))
