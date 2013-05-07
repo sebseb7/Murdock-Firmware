@@ -153,9 +153,9 @@ static struct pid_conf_t pitch_pid;
 static float filter_acc_x_window[ACC_FILTER_SIZE];
 static float filter_acc_y_window[ACC_FILTER_SIZE];
 static float filter_acc_z_window[ACC_FILTER_SIZE];
-static float filtered_acc_x =0.0f;;
-static float filtered_acc_y =0.0f;;
-static float filtered_acc_z =0.0f;;
+static float filtered_acc_x =0.0f;
+static float filtered_acc_y =0.0f;
+static float filtered_acc_z =0.0f;
 static uint32_t filter_acc_index=0;
 
 #define PID_FILTER_SIZE 5
@@ -240,11 +240,11 @@ int main(void)
 	//pid_init(&heading_pid);
 	
 	pitch_pid.Kp = 15.4f;
-	pitch_pid.Ki = 0.0937f; //langsam 
+	pitch_pid.Ki = 0.937f; //langsam 
 	pitch_pid.Kd = 0.0202377f;
 
 	roll_pid.Kp = 10.4f;
-	roll_pid.Ki = 0.0937f; //langsam 
+	roll_pid.Ki = 0.937f; //langsam 
 	roll_pid.Kd = 0.0202377f;
 
 	load_config(&qcorrQ.w,&qcorrQ.x,&qcorrQ.y,&qcorrQ.z,&bias_gyro_x,&bias_gyro_y,&bias_gyro_z,&bias_acc_x,&bias_acc_y,&bias_acc_z);
@@ -636,9 +636,9 @@ void event_loop(uint8_t sd_available)
 						min_acc_x = raw[0];
 					}
 
-					float acc_x = (raw[0] - bias_acc_x) / 61436.25f;
-					float acc_y = (raw[1] - bias_acc_y) / 61436.25f;
-					float acc_z = (raw[2] - bias_acc_z) / 61436.25f;
+					float acc_x = (raw[0] - bias_acc_x) / 4096.0f;
+					float acc_y = (raw[1] - bias_acc_y) / 4096.0f;
+					float acc_z = (raw[2] - bias_acc_z) / 4096.0f;
 					//float acc_x = (raw[0] - bias_acc_x) / 16383.0f;
 					//float acc_y = (raw[1] - bias_acc_y) / 16383.0f;
 					//float acc_z = (raw[2] - bias_acc_z) / 16383.0f;
@@ -747,9 +747,9 @@ void event_loop(uint8_t sd_available)
 						filter_acc_index=0;
 					
 
-					acc_x = filtered_acc_x;
-					acc_y = filtered_acc_y;
-					acc_z = filtered_acc_z;
+					//acc_x = filtered_acc_x;
+					//acc_y = filtered_acc_y;
+					//acc_z = filtered_acc_z;
 
 					MadgwickAHRSupdateIMU(gyro_x, gyro_y, gyro_z, acc_x, acc_y, acc_z);
 
@@ -861,7 +861,8 @@ void event_loop(uint8_t sd_available)
 						
 						//usb_printf(" %f %f %f\n",pitch_deg,roll_deg,elev_out);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z);
-						usb_printf("%f %f %f %f %i %i %i %i %i %i\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,raw[0]- bias_acc_x,raw[1]- bias_acc_y,raw[2]- bias_acc_z,raw[3] - bias_gyro_x,raw[4] - bias_gyro_y,raw[5] - bias_gyro_z);
+						usb_printf("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8,ap_roll,ap_nick,pitch_pid.P,pitch_pid.I,pitch_pid.D,roll_pid.P,roll_pid.I,roll_pid.D);
+						//usb_printf("%f %f %f %f %i %i %i %i %i %i\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,raw[0]- bias_acc_x,raw[1]- bias_acc_y,raw[2]- bias_acc_z,raw[3] - bias_gyro_x,raw[4] - bias_gyro_y,raw[5] - bias_gyro_z);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 #endif
 						unsigned int start_time = get_systick();
