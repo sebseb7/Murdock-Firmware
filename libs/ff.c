@@ -1224,6 +1224,7 @@ FRESULT dir_alloc (
 			res = dir_next(dj, 1);		/* Next entry with table stretch enabled */
 		} while (res == FR_OK);
 	}
+	if (res == FR_NO_FILE) res = FR_DENIED;
 	return res;
 }
 #endif
@@ -2559,7 +2560,7 @@ FRESULT f_write (
 		LEAVE_FF(fp->fs, FR_INT_ERR);
 	if (!(fp->flag & FA_WRITE))				/* Check access mode */
 		LEAVE_FF(fp->fs, FR_DENIED);
-	if ((DWORD)(fp->fsize + btw) < fp->fsize) btw = 0;	/* File size cannot reach 4GB */
+	if ((DWORD)fp->fptr + btw < fp->fptr) btw = 0;	/* File size cannot reach 4GB */
 
 	for ( ;  btw;							/* Repeat until all data written */
 		wbuff += wcnt, fp->fptr += wcnt, *bw += wcnt, btw -= wcnt) {
