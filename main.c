@@ -264,12 +264,12 @@ int main(void)
 	bias_acc_z=0;
 	*/
 	
-	bias_gyro_x=-38;
-	bias_gyro_y=-10;
-	bias_gyro_z=-35;
-	bias_acc_x=180;
-	bias_acc_y=-20;
-	bias_acc_z=215;
+	bias_gyro_x=-32;
+	bias_gyro_y=-15;
+	bias_gyro_z=-25;
+	bias_acc_x=130;
+	bias_acc_y=-150;
+	bias_acc_z=-455;
 
 	while(1)  // main loop
 	{
