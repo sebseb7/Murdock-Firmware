@@ -239,13 +239,12 @@ int main(void)
 	//pid_init(&alt_pid);
 	//pid_init(&heading_pid);
 	
-	pitch_pid.Kp = 15.4f;
-	pitch_pid.Ki = 0.937f; //langsam 
-	pitch_pid.Kd = 0.0202377f;
-
-	roll_pid.Kp = 10.4f;
-	roll_pid.Ki = 0.937f; //langsam 
-	roll_pid.Kd = 0.0202377f;
+	pitch_pid.Kp = 6.4f;
+	pitch_pid.Ki = 4.1937f; //langsam
+	pitch_pid.Kd = 0.08f;
+	roll_pid.Kp = 6.6f;
+	roll_pid.Ki = 5.02f; //langsam 
+	roll_pid.Kd = 0.108f;
 
 	load_config(&qcorrQ.w,&qcorrQ.x,&qcorrQ.y,&qcorrQ.z,&bias_gyro_x,&bias_gyro_y,&bias_gyro_z,&bias_acc_x,&bias_acc_y,&bias_acc_z);
 			
@@ -861,7 +860,8 @@ void event_loop(uint8_t sd_available)
 						
 						//usb_printf(" %f %f %f\n",pitch_deg,roll_deg,elev_out);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z);
-						usb_printf("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8,ap_roll,ap_nick,pitch_pid.P,pitch_pid.I,pitch_pid.D,roll_pid.P,roll_pid.I,roll_pid.D);
+					//	usb_printf("%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8,ap_roll,ap_nick,pitch_pid.P,pitch_pid.I,pitch_pid.D,roll_pid.P,roll_pid.I,roll_pid.D);
+						usb_printf("%f %f %f %f %f %f %f\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,acc_x,acc_y,acc_z);
 						//usb_printf("%f %f %f %f %i %i %i %i %i %i\n",correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,raw[0]- bias_acc_x,raw[1]- bias_acc_y,raw[2]- bias_acc_z,raw[3] - bias_gyro_x,raw[4] - bias_gyro_y,raw[5] - bias_gyro_z);
 						//usb_printf("%f %f %f %f %f %f %f %f %f %f %f\n",q0,q1,q2,q3,correctedQ.w,correctedQ.x,correctedQ.y,correctedQ.z,pitch,roll,yaw);
 #endif
