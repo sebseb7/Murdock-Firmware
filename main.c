@@ -22,6 +22,7 @@
 #include "libs/pid.h"
 #include "libs/qoffset.h"
 #include "libs/config.h"
+#include "libs/ak8975.h"
 
 /*
  *	boot loader: http://www.st.com/stonline/stappl/st/com/TECHNICAL_RESOURCES/TECHNICAL_LITERATURE/APPLICATION_NOTE/CD00167594.pdf (page 31)
@@ -223,6 +224,7 @@ int main(void)
 
 #ifdef USE_USB_OTG_FS
 	usb_serial_init();
+	usb_printf("sp2 out of sync\n");
 #endif
 
 
@@ -272,7 +274,7 @@ int main(void)
 
 	while(1)  // main loop
 	{
-		event_loop(1);
+		event_loop(0);
 	}
 }
 
@@ -589,7 +591,7 @@ void event_loop(uint8_t sd_available)
 			unsigned int start_time = get_systick();
 			unsigned int int_status = MPU6050_GetIntStatus();
 			unsigned int diff = get_systick()-start_time;
-			//usb_printf("diff: %i , %i (%i) (%i %i %i %i %i %i %i)\n",diff,int_status,i2c_errors,i2c_e[0],i2c_e[1],i2c_e[2],i2c_e[3],i2c_e[4],i2c_e[5],i2c_e[6]);
+			usb_printf("diff: %i , %i (%i) (%i %i %i %i %i %i %i)\n",diff,int_status,i2c_errors,i2c_e[0],i2c_e[1],i2c_e[2],i2c_e[3],i2c_e[4],i2c_e[5],i2c_e[6]);
 
 
 			if(diff > 10)

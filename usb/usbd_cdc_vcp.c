@@ -34,6 +34,7 @@
 #include "usb_conf.h"
 #include "libs/usb_serial.h"
 #include "libs/leds.h"
+#include "main.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -255,7 +256,13 @@ static uint16_t VCP_DataRx (uint8_t* Buf, uint32_t Len)
   if(APP_Rx_ptr_in >= APP_RX_DATA_SIZE)
   {
     APP_Rx_ptr_in = 0;
-  }  
+  } 
+
+
+	  if(*(Buf+i) == '?')
+	  {
+		enter_system_bootloader();
+	  }
   
   } 
     

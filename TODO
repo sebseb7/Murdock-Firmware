@@ -1,0 +1,6 @@
+write calibration data to eeprom (and read it after next boot)
+implent target roll and nick using two knobs on ch4 und ch5
+imppement acitvating stabilized flight in ch6
+make gain controllable via ch7 and ch8
+
+

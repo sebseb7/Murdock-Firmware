@@ -11,7 +11,7 @@ WITHUSB=1
 
 
 
-SRC=$(wildcard  *.c libs/*.c) core/stm32fxxx_it.c core/system_stm32f$(STM32F)xx.c core/syscalls.c
+SRC=$(wildcard  *.c libs/*.c libs/mpu/*.c) core/stm32fxxx_it.c core/system_stm32f$(STM32F)xx.c core/syscalls.c
 
 ifeq ($(WITHUSB),1)
 SRC +=$(wildcard usb/*.c) STM32_USB_Device_Library/Core/src/usbd_core.c \
@@ -113,5 +113,6 @@ clean:
 
 flash: all
 	dfu-util -a 0 -s 0x08000000 -D .bin/$(PROJECT).bin -R
+	#tools/flash/st-flash write .bin/$(PROJECT).bin 0x08000000 
 
 .PHONY : clean all flash
